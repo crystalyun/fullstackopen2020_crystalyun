@@ -1,0 +1,20 @@
+Create a diagram depicting the situation where user creates a new note using the single page version of the app.
+
+title 0.6 single page app - new note 
+note over browser:
+user press 'submit' button 
+with new form data. 
+
+instead of sending POST request to the server 
+and reloading/redirecting the entire page, 
+browser runs redrawNotes() 
+to update Notes list with new form data 
+end note 
+
+browser->server : HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+server-->browser: HTTP 201 (created) response 
+
+note over browser: 
+browser prints out 
+{"message": "note created"} to the console 
+end note 
