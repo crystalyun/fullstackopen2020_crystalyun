@@ -9,28 +9,34 @@ const Statistics = ({good, neutral, bad}) => {
   }
 
   return(
-    <div>
-      <Statistic text='good' calc={good}/>
-      <Statistic text='neutral' calc={neutral}/>
-      <Statistic text='bad' calc={bad}/>
-      <Statistic text='all' calc={good + neutral + bad}/>
-      <Statistic text='average' calc={(good-bad)/(good+neutral+bad) || 0}/>
-      <Statistic text='positive' calc={((good)/(good+neutral+bad))*100 || 0} />
-    </div>
+    <table>
+      <tbody>
+        <Statistic text='good' calc={good}/>
+        <Statistic text='neutral' calc={neutral}/>
+        <Statistic text='bad' calc={bad}/>
+        <Statistic text='all' calc={good + neutral + bad}/>
+        <Statistic text='average' calc={(good-bad)/(good+neutral+bad) || 0}/>
+        <Statistic text='positive' calc={((good)/(good+neutral+bad))*100 || 0} />
+      </tbody>
+    </table>
   )
 }
 
 const Statistic = ({ text,calc }) => {
   if (text === 'positive') {
     return(
-      <p>{text} {calc} %</p>
+      <tr>
+        <td>{text}</td>
+        <td>{calc} %</td>
+      </tr>
     )
   }
 
   return(
-    <p>
-      {text} {calc}
-    </p>
+    <tr>
+      <td>{text}</td>
+      <td>{calc}</td>
+    </tr>
   )
 }
 
