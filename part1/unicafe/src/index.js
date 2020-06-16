@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-const Statistics = (props) => {
-  let percentageStr = '%'
-  if ((props.label) === 'positive') {
-    return (<p>{props.label} {props.value} {percentageStr} </p>)
+const Statistics = ({good, neutral, bad}) => {
+  if (good === 0 && neutral === 0 && bad === 0) {
+    return(
+      <div>No feedback given</div>
+    )
   }
-  
-  return <p>{props.label} {props.value}</p>
+
+  return(
+    <div>
+      <p>good {good}</p>
+      <p>neutral {neutral}</p>
+      <p>bad {bad}</p>
+      <p>all {good + neutral + bad}</p>
+      <p>average {(good-bad)/(good+neutral+bad) || 0}</p>
+      <p>positive {((good)/(good+neutral+bad))*100 || 0} %</p>
+    </div>
+  )
 }
 
       
@@ -24,18 +34,10 @@ const App = () => {
       <button onClick={() => setBad(bad + 1)}>bad</button>
 
       <h1>statistics</h1>
-      <Statistics label='good' value={good} />
-      <Statistics label='neutral' value={neutral} />
-      <Statistics label='bad' value={bad} />
-      <Statistics label='all' value={good + neutral + bad} />
-      <Statistics label='average' value={(good-bad)/(good+neutral+bad) || 0} />
-      <Statistics label='positive' value={((good)/(good+neutral+bad))*100 || 0} /> 
+      <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
   )
 }
-
-
-
 
 
 ReactDOM.render(<App />, document.getElementById('root'))
