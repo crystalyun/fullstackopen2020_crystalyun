@@ -3,40 +3,32 @@ import ReactDOM from 'react-dom';
 
 const Header = (props) => {
   return (
-    <>
       <h1>{props.course}</h1>
-    </>
   )
 }
 
 const Part = (props) => {
   console.log('pooboo', props)
   return (
-    <>
       <p>{props.name} {props.exercises}</p>
-    </>
   )
 }
 
 const Content = (props) => {
   const myArray = props.parts
   return (
-    <>
+    <div>
       <Part name={myArray[0].name} exercises={myArray[0].exercises} />
       <Part name={myArray[1].name} exercises={myArray[1].exercises} />
       <Part name={myArray[2].name} exercises={myArray[2].exercises} />
-    </>
+    </div>
   )
 }
-
-
 
 const Total = (props) => {
   const myArray = props.parts
   return (
-    <>
       <p>Number of exercises {myArray[0].exercises + myArray[1].exercises + myArray[2].exercises}</p>
-    </>
   )
 }
 
