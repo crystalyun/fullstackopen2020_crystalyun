@@ -16,22 +16,13 @@ const Statistics = ({good, neutral, bad}) => {
         <Statistic text='bad' calc={bad}/>
         <Statistic text='all' calc={good + neutral + bad}/>
         <Statistic text='average' calc={(good-bad)/(good+neutral+bad) || 0}/>
-        <Statistic text='positive' calc={((good)/(good+neutral+bad))*100 || 0} />
+        <Statistic text='positive' calc={`${((good)/(good+neutral+bad))*100 || 0} %`} />
       </tbody>
     </table>
   )
 }
 
 const Statistic = ({ text,calc }) => {
-  if (text === 'positive') {
-    return(
-      <tr>
-        <td>{text}</td>
-        <td>{calc} %</td>
-      </tr>
-    )
-  }
-
   return(
     <tr>
       <td>{text}</td>
