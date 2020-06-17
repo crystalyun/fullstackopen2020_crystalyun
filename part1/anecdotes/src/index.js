@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
+const Button = ({text,onClick}) => <button onClick={onClick}>{text}</button>
+  
+const Display = ({heading,anecdotes,selected,votes}) => {
+  return (
+    <div>
+      <h1>{heading}</h1>
+      {anecdotes[selected]} <br />
+      has {votes[selected]} votes
+    </div>
+  )
+}
+
 const App = (props) => {
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState(Array(props.anecdotes.length).fill(0))
@@ -16,15 +28,17 @@ const App = (props) => {
     copy[selected] +=1 
     setVotes(copy)
   }
+
+  const maxVote = votes.indexOf(Math.max(...votes))
   
   return (
     <div>
-      {props.anecdotes[selected]} <br />
-      has {votes[selected]} votes
+      <Display heading='Anecdote of the day' anecdotes={props.anecdotes} selected={selected} votes={votes}/>
       <div>
-       <button onClick={() => changeSelectedbyRandomNumber()}>next anecdote</button>
-       <button onClick={() => increaseVotesByOne()}>vote</button>
+       <Button text='next anecdote' onClick={() => changeSelectedbyRandomNumber()} />
+       <Button text='vote' onClick={() => increaseVotesByOne()} />
       </div>
+      <Display heading='Anecdote with most votes' anecdotes={props.anecdotes} selected={maxVote} votes={votes} />
     </div>
   )
 }
