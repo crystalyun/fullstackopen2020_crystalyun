@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 const Header = ({ course }) => {
   return (
-    <h1>{course.name}</h1>
+    <h2>{course.name}</h2>
   )
 }
 
@@ -43,7 +43,8 @@ const Course = ({course}) => {
 }
 
 const App = () => {
-  const course = {
+  const course = [
+  {
     id: 1,
     name: 'Half Stack application development',
     parts: [
@@ -68,9 +69,35 @@ const App = () => {
         id: 4
       },
     ]
+  },
+  {
+    name: 'Node.js',
+    id: 2,
+    parts: [
+      {
+        name: 'Routing',
+        exercises: 3,
+        id: 1
+      },
+      {
+        name: 'Middlewares',
+        exercises: 7,
+        id: 2
+      }
+    ]
   }
+ ]
 
-  return <Course course={course} />
+ return (
+   <div>
+     <h1>Web development curriculum</h1>
+     {course.map(oneCourse => 
+        <Course key={oneCourse.id} course={oneCourse} />
+     )}
+   </div>
+ )
 }
 
+
 ReactDOM.render(<App />, document.getElementById('root'))
+
