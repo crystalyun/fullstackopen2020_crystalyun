@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
 const Button = ({text,onClick}) => <button onClick={onClick}>{text}</button>
-  
-const Display = ({heading,anecdotes,selected,votes}) => {
+
+const Display = ({heading,text,votesCount}) => {
   return (
     <div>
       <h1>{heading}</h1>
-      {anecdotes[selected]} <br />
-      has {votes[selected]} votes
+      {text} <br />
+      has {votesCount} votes
     </div>
   )
 }
@@ -33,12 +33,12 @@ const App = (props) => {
   
   return (
     <div>
-      <Display heading='Anecdote of the day' anecdotes={props.anecdotes} selected={selected} votes={votes}/>
+      <Display heading='Anecdote of the day' text={props.anecdotes[selected]} votesCount={votes[selected]}/>
       <div>
        <Button text='next anecdote' onClick={() => changeSelectedbyRandomNumber()} />
        <Button text='vote' onClick={() => increaseVotesByOne()} />
       </div>
-      <Display heading='Anecdote with most votes' anecdotes={props.anecdotes} selected={maxVote} votes={votes} />
+      <Display heading='Anecdote with most votes' text={props.anecdotes[maxVote]} votesCount={votes[maxVote]} />
     </div>
   )
 }
