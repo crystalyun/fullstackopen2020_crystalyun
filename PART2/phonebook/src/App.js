@@ -1,5 +1,40 @@
 import React, { useState } from 'react';
 
+const PersonForm = ({ newName, newNumber, addNewPerson, handleNameChange, handleNumberChange }) => {
+  return (
+    <form onSubmit={addNewPerson}>
+        <div>
+          name: <input value={newName} onChange={handleNameChange} />
+        </div>
+        <div>
+          number: <input value={newNumber} onChange={handleNumberChange} />
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+    </form>
+  )
+}
+
+const Filter = ({filterName, handleFilterNameChange}) => {
+  return (
+    <div>
+      filter shown with <input value={filterName} onChange={handleFilterNameChange} />
+    </div>
+  )
+}
+
+const Person = ({person}) => (
+  <p> {person.name} {person.number} </p>
+)
+
+const Persons = ({persons}) => {
+  const personsList = persons.map(person => <Person key={person.name} person={person}/>)
+  return (
+    personsList
+  )
+}
+
 const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
@@ -15,7 +50,7 @@ const App = () => {
   const addNewPerson = (event) => {
     event.preventDefault()
 
-    if ((persons.filter(person => person.name === newName)).length > 0) {
+    if ((persons.filter(a => a.name === newName)).length > 0) {
       alert(`${newName} is already added to phonebook`)
     } else {
       const personObject = {
@@ -40,29 +75,26 @@ const App = () => {
     setFilterName(event.target.value.toLowerCase())
   }
 
+  const filteredPersonsArray = persons.filter(person => person.name.toLowerCase().includes(filterName.toLowerCase()))
+
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter shown with <input value={filterName} onChange={handleFilterNameChange} />
-      </div>
-      <h2>add a new</h2>
-      <form onSubmit={addNewPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      {persons.filter(person => person.name.toLowerCase().includes(filterName)).map(person => <p key={person.name}>{person.name} {person.number}</p>)}
+
+      <Filter filterName={filterName} handleFilterNameChange={handleFilterNameChange} />
+      
+      <h3>add a new</h3>
+
+      <PersonForm newName={newName} newNumber={newNumber} addNewPerson={addNewPerson} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange}/>
+      
+      <h3>Numbers</h3>
+
+      <Persons persons={filteredPersonsArray} />
+
       <br /><br /><div>debug: newName state is : {newName}</div>
       <div>debug: newNumber state is : {newNumber}</div>
       <div>debug: filterName state is : {filterName}</div>
+
     </div>
   )
 }
