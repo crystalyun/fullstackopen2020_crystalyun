@@ -101,10 +101,39 @@ const CountryInfo = (props) => {
         {country.languages.map(language => <li key={language.name}>{language.name}</li>)}
       </ul>
       <img src={country.flag} alt="flag" width="100" height="100"/>
+      <Weather cityName={country.capital} />
     </div>
 
   )
 }
+
+const Weather = ({cityName}) => {
+  const [ weatherInfo, setWeatherInfo ] = useState({});
+  
+  useEffect(() => {
+    console.log('effect to fetch Weather data')
+    const myKey = process.env.REACT_APP_API_KEY
+    console.log('using key : ', myKey)
+    axios
+      .get(`http://api.weatherstack.com/current?access_key=${myKey}&query=${cityName}`)
+      .then(response => {
+        console.log('promise fulfilled.')
+        setWeatherInfo(response.data.current)
+      })
+  }, []);
+
+
+
+  return (
+    <div>
+      <h3>Weather in {cityName}</h3>
+      <div><strong>temperature :</strong> {weatherInfo.temperature} Celcius</div>
+      <img src={weatherInfo.weather_icons} alt="weather" width="100" height="100" />
+      <div><strong>wind : </strong>{weatherInfo.wind_speed} mph direction {weatherInfo.wind_dir}</div>
+    </div>
+  )
+}
+
 
 
 export default App
