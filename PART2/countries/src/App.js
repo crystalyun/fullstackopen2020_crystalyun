@@ -21,23 +21,19 @@ const App = ({course}) => {
   }, []);
 
   useEffect(() => {
-    const filteredList = countryList.filter(country => country.name.toLowerCase().includes(userInput))
+    const filteredList = countryList.filter(country => country.name.toLowerCase().includes(userInput.toLowerCase()))
     console.log(`filter countryList by user input ${userInput}`)
     setFilteredCountryList(filteredList);
   }, [userInput]);
 
-  console.log('refresh rerender')
+  console.log('rerender App component')
 
   return (
     <div>
       <CountrySearch userInput={userInput} handleChangeUserInput={handleChangeUserInput}/>
       
-      <SearchResultDisplay filteredCountryList={filteredCountryList}/>
+      <SearchResultDisplay filteredCountryList={filteredCountryList} setUserInput={setUserInput} />
 
-      <div><br /><br />
-      debug : current userInput {userInput} 
-      <br />debug : current filtered country list {filteredCountryList.map(country => <li key={country.alpha3Code}>{country.name}</li>)}
-      </div>
     </div>
   )
 }
@@ -50,7 +46,15 @@ const CountrySearch = ({userInput, handleChangeUserInput}) => {
   )
 }
 
-const SearchResultDisplay = ({filteredCountryList}) => {
+const SearchResultDisplay = (props) => {
+  const { filteredCountryList, setUserInput } = props;
+
+  const showCountryInfo = (country) => {
+    setUserInput(country.name)
+  }
+
+  console.log('rerender SearchResultDisplay component.')
+
   if (filteredCountryList.length === 0) {
     return (<div>zero match</div>)
   } else if (filteredCountryList.length === 1) {
@@ -58,15 +62,35 @@ const SearchResultDisplay = ({filteredCountryList}) => {
   } else if (filteredCountryList.length > 10) {
       return (<div>Too many matches, specify another filter</div>)
   } else {
-      return ( 
-        <div>
-          {filteredCountryList.map(country => <li key={country.alpha3Code}>{country.name}</li>)}
-        </div>
-      )
-  }    
+    return ( 
+      <div>
+        {filteredCountryList.map(country => <MapFunction key={country.name} country={country} showCountryInfo={() => showCountryInfo(country)}/>)}
+      </div>
+    )
+  }
+
+}    
+
+const MapFunction = ({country, showCountryInfo}) => {
+  return (
+    <div>
+      <span>{country.name}</span>
+      <Button text="show" handleClick={showCountryInfo}/>
+    </div>
+  )
 }
 
-const CountryInfo = ({country}) => {
+const Button = (props) => {
+  return (
+    <button onClick={props.handleClick}>
+      {props.text}
+    </button>
+  )
+}
+
+
+const CountryInfo = (props) => {
+  const { country } = props;
   return (
     <div>
       <h2>{country.name}</h2>
