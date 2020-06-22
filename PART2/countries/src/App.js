@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const App = ({course}) => {
+const App = () => {
   const [userInput, setUserInput] = useState('');
   const [countryList, setCountryList] = useState([]);
-  const [filteredCountryList, setFilteredCountryList] = useState([]);
 
   const handleChangeUserInput = event => {
     setUserInput(event.target.value);
+  }
+
+  const handleShow = event => {
+    console.log('print out event.target.name : ', event.target.name)
+    setUserInput(event.target.name)
   }
 
   useEffect(() => {
@@ -19,21 +23,23 @@ const App = ({course}) => {
         setCountryList(response.data)
       })
   }, []);
+    
 
-  useEffect(() => {
+  const filterCountryListByUserInput = () => {
+    console.log(`filter by user input ${userInput}`)
+    if (!userInput) {
+      return [];
+    }
     const filteredList = countryList.filter(country => country.name.toLowerCase().includes(userInput.toLowerCase()))
-    console.log(`filter countryList by user input ${userInput}`)
-    setFilteredCountryList(filteredList);
-  }, [userInput]);
+    return filteredList;
+  }
 
   console.log('rerender App component')
 
   return (
     <div>
       <CountrySearch userInput={userInput} handleChangeUserInput={handleChangeUserInput}/>
-      
-      <SearchResultDisplay filteredCountryList={filteredCountryList} setUserInput={setUserInput} />
-
+      <SearchResultDisplay filteredCountryList={filterCountryListByUserInput()} handleShow={handleShow} />
     </div>
   )
 }
@@ -47,42 +53,29 @@ const CountrySearch = ({userInput, handleChangeUserInput}) => {
 }
 
 const SearchResultDisplay = (props) => {
-  const { filteredCountryList, setUserInput } = props;
+  const { filteredCountryList, handleShow } = props;
 
-  const showCountryInfo = (country) => {
-    setUserInput(country.name)
-  }
-
-  console.log('rerender SearchResultDisplay component.')
-
-  if (filteredCountryList.length === 0) {
-    return (<div>zero match</div>)
-  } else if (filteredCountryList.length === 1) {
-      return (<CountryInfo country={filteredCountryList[0]} />)
-  } else if (filteredCountryList.length > 10) {
-      return (<div>Too many matches, specify another filter</div>)
-  } else {
+  if (filteredCountryList.length > 10) {
+    return (<div>Too many matches, specify another filter</div>)
+  } else if (filteredCountryList.length > 1) {
     return ( 
       <div>
-        {filteredCountryList.map(country => <MapFunction key={country.name} country={country} showCountryInfo={() => showCountryInfo(country)}/>)}
+        {filteredCountryList.map(country =>
+        <div key={country.name}>
+          <span>{country.name}</span><Button text="show" handleClick={handleShow} name={country.name}/>
+        </div> 
+        )}
       </div>
     )
-  }
-
-}    
-
-const MapFunction = ({country, showCountryInfo}) => {
-  return (
-    <div>
-      <span>{country.name}</span>
-      <Button text="show" handleClick={showCountryInfo}/>
-    </div>
-  )
+  } else if (filteredCountryList.length === 1) {
+      return (<CountryInfo country={filteredCountryList[0]} />)
+  } else return (<div>zero match</div>)
 }
+
 
 const Button = (props) => {
   return (
-    <button onClick={props.handleClick}>
+    <button name={props.name} onClick={props.handleClick}>
       {props.text}
     </button>
   )
@@ -100,7 +93,7 @@ const CountryInfo = (props) => {
       <ul>
         {country.languages.map(language => <li key={language.name}>{language.name}</li>)}
       </ul>
-      <img src={country.flag} alt="flag" width="100" height="100"/>
+      <img src={country.flag} alt={country.name} height="100"/>
       <Weather cityName={country.capital} />
     </div>
 
@@ -123,17 +116,14 @@ const Weather = ({cityName}) => {
   }, []);
 
 
-
   return (
     <div>
       <h3>Weather in {cityName}</h3>
       <div><strong>temperature :</strong> {weatherInfo.temperature} Celcius</div>
-      <img src={weatherInfo.weather_icons} alt="weather" width="100" height="100" />
-      <div><strong>wind : </strong>{weatherInfo.wind_speed} mph direction {weatherInfo.wind_dir}</div>
+      <img src={weatherInfo.weather_icons} alt={weatherInfo.weather_descriptions} height="100" />
+      <div><strong>wind : </strong>{weatherInfo.wind_speed} km/h direction {weatherInfo.wind_dir}</div>
     </div>
   )
 }
-
-
 
 export default App
