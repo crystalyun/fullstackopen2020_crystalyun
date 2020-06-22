@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import phonebookService from './services/phonebook'
-import axios from 'axios';
 
 
 
@@ -71,8 +70,18 @@ const App = () => {
   const addNewPerson = (event) => {
     event.preventDefault()
 
-    if ((persons.filter(a => a.name === newName)).length > 0) {
-      alert(`${newName} is already added to phonebook`)
+    const userExists = (persons.filter(a => a.name === newName)).length > 0
+    if (userExists) {
+      const isUserUpdate = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one ?`)
+      if (isUserUpdate) {
+      const registeredPerson = persons.find(person => person.name === newName)
+      const updatedRegisteredPerson = { ...registeredPerson, number: newNumber }
+      phonebookService
+        .update(registeredPerson.id, updatedRegisteredPerson)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => person.id !== returnedPerson.id ? person : updatedRegisteredPerson))
+      })
+      }
     } else {
       const personObject = {
         name: newName,
@@ -82,12 +91,12 @@ const App = () => {
         .create(personObject)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setNewName('')
-          setNewNumber('')
         })
     }
+    setNewName('')
+    setNewNumber('')  
   }
-
+  
   const handleNameChange= (event) => {
     setNewName(event.target.value)
   }
@@ -133,6 +142,6 @@ const App = () => {
 
     </div>
   )
-}
+};
 
-export default App
+export default App;
