@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import phonebookService from './services/phonebook'
+import axios from 'axios';
 
 
 
@@ -27,12 +28,22 @@ const Filter = ({filterName, handleFilterNameChange}) => {
   )
 }
 
-const Person = ({person}) => (
-  <p> {person.name} {person.number} </p>
+const Person = ({ person, handleClick, value }) => (
+  <div>
+    <span> {person.name} {person.number} </span>
+    <Button text="delete" onClick={handleClick} value={value} name={person.name} />
+  </div>
 )
 
-const Persons = ({persons}) => {
-  const personsList = persons.map(person => <Person key={person.id} person={person}/>)
+const Button = ({text, onClick, value, name}) => {
+  return (
+  <button onClick={onClick} value={value} name={name} >{text}</button>
+  )
+}
+
+
+const Persons = ({persons, handleClick}) => {
+  const personsList = persons.map(person => <Person key={person.id} person={person} handleClick={handleClick} value={person.id} />)
   return (
     personsList
   )
@@ -44,7 +55,8 @@ const App = () => {
   const [ filterName, setFilterName ] = useState('')
 
   const [ persons, setPersons ] = useState([])
-
+  
+  // ONLY RUNS ONCE 
   useEffect(() => {
     console.log('effect')
     phonebookService
@@ -52,7 +64,7 @@ const App = () => {
       .then(initialPersons => {
         setPersons(initialPersons)
       })
-  }, [])
+  },[])
 
   console.log('rendered', persons.length, 'persons')
 
@@ -88,6 +100,17 @@ const App = () => {
     setFilterName(event.target.value.toLowerCase())
   }
 
+  // event.target.value is a string, person.id is a number 
+  const handleClick = (event) => {
+    const id = event.target.value
+    if (window.confirm(`Delete ${event.target.name} ?`)) {
+      phonebookService.deleteID(id)
+      .then(response => {
+        setPersons(persons.filter(person => parseInt(id) !== person.id))
+      })
+    } else {console.log('no state update')}
+  }
+
   const filteredPersonsArray = persons.filter(person => person.name.toLowerCase().includes(filterName.toLowerCase()))
 
   return (
@@ -102,7 +125,7 @@ const App = () => {
       
       <h3>Numbers</h3>
 
-      <Persons persons={filteredPersonsArray} />
+      <Persons persons={filteredPersonsArray} handleClick={handleClick} />
 
       <br /><br /><div>debug: newName state is : {newName}</div>
       <div>debug: newNumber state is : {newNumber}</div>
