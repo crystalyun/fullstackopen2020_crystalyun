@@ -27,22 +27,22 @@ const Filter = ({filterName, handleFilterNameChange}) => {
   )
 }
 
-const Person = ({ person, handleClick, value }) => (
+const Person = ({ person, handleClick }) => (
   <div>
     <span> {person.name} {person.number} </span>
-    <Button text="delete" onClick={handleClick} value={value} name={person.name} />
+    <Button text="delete" onClick={() => handleClick(person.id, person.name)}/>
   </div>
 )
 
-const Button = ({text, onClick, value, name}) => {
+const Button = ({text, onClick}) => {
   return (
-  <button onClick={onClick} value={value} name={name} >{text}</button>
+  <button onClick={onClick}>{text}</button>
   )
 }
 
 
 const Persons = ({persons, handleClick}) => {
-  const personsList = persons.map(person => <Person key={person.id} person={person} handleClick={handleClick} value={person.id} />)
+  const personsList = persons.map(person => <Person key={person.id} person={person} handleClick={handleClick}/>)
   return (
     personsList
   )
@@ -108,15 +108,14 @@ const App = () => {
   const handleFilterNameChange = (event) => {
     setFilterName(event.target.value.toLowerCase())
   }
-
-  // event.target.value is a string, person.id is a number 
-  const handleClick = (event) => {
-    const id = event.target.value
-    if (window.confirm(`Delete ${event.target.name} ?`)) {
-      phonebookService.deleteID(id)
-      .then(response => {
-        setPersons(persons.filter(person => parseInt(id) !== person.id))
-      })
+  
+  const handleClick = (id, name) => {
+    if (window.confirm(`Delete ${name} ?`)) {
+      phonebookService
+        .deleteID(id)
+        .then(() => {
+          setPersons(persons.filter(person => id !== person.id))
+        })
     } else {console.log('no state update')}
   }
 
