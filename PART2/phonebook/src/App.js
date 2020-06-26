@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import phonebookService from './services/phonebook'
 
+/* feedback 
+1. css should be DRY 
+2. 1 state for notification, not 2 states 
+*/
+
 const PersonForm = ({ newName, newNumber, addNewPerson, handleNameChange, handleNumberChange }) => {
   return (
     <form onSubmit={addNewPerson}>
