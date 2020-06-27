@@ -1,0 +1,4 @@
+@id = 367
+DELETE https://secret-mesa-21800.herokuapp.com/api/persons/{{id}}
+
+

@@ -1,6 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
-
+// const cors = require('cors')
 const app = express()
 
 
@@ -33,7 +33,8 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-
+// app.use(cors())
+app.use(express.static('build'))
 app.use(express.json())
 
 morgan.token('requestBody', function(req, res) {
@@ -77,6 +78,7 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
+    console.log('request.body is : ', request.body)
     const body = request.body 
 
     if (!body.name) {
@@ -108,8 +110,8 @@ app.post('/api/persons', (request, response) => {
     response.json(person)
 })
 
-
-const PORT = 3001
+// `process.env.PORT` allows Heroku (prod environment) to set its PORT on its own. 3001 is for development
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
