@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import phonebookService from './services/phonebook'
 
-/* feedback 
-1. css should be DRY 
-2. 1 state for notification, not 2 states 
-*/
-
 const PersonForm = ({ newName, newNumber, addNewPerson, handleNameChange, handleNumberChange }) => {
   return (
     <form onSubmit={addNewPerson}>
@@ -51,14 +46,14 @@ const Persons = ({persons, handleClick}) => {
   )
 }
 
-const Notification = ({ message, isError }) => {
-  if (message === null) {
+const Notification = ({ notification }) => {
+  if (notification.message === null) {
     return null
   }
 
   return (
-    <div className={isError? "errorNotification" : "successfulNotification"}>
-      {message}
+    <div className={notification.error ? "notification error" : "notification success"}>
+      {notification.message}
     </div>
   )
 }
@@ -68,8 +63,10 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ filterName, setFilterName ] = useState('')
   const [ persons, setPersons ] = useState([])
-  const [notificationMessage, setNotificationMessage] = useState(null)
-  const [isError, setIsError] = useState(false)
+  const [notification, setNotification] = useState({
+    message: null, 
+    error: false
+  })
 
   // ONLY RUNS ONCE 
   useEffect(() => {
@@ -96,22 +93,17 @@ const App = () => {
         .update(registeredPerson.id, updatedRegisteredPerson)
         .then(returnedPerson => {
           setPersons(persons.map(person => person.id !== returnedPerson.id ? person : updatedRegisteredPerson))
-          setNotificationMessage(`Changed number of ${returnedPerson.name}`)
+          setNotification({ message: `Changed number of ${returnedPerson.name}`, error: false })
 
           setTimeout(() => {
-            setNotificationMessage(null)
+            setNotification({ message: null, error: false })
           }, 3000)
         })
         .catch(error => {
-          setIsError(true)
-
-          setNotificationMessage(`Information of ${registeredPerson.name} has already been removed from server`)
-
-          setPersons(persons.filter(person => person.name !== registeredPerson.name))
-
+          setNotification({ message: error.response.data.error, error: true })
+      
           setTimeout(() => {
-            setNotificationMessage(null);
-            setIsError(false)
+            setNotification({ message: null, error: false })
           }, 3000)
 
       })
@@ -125,10 +117,17 @@ const App = () => {
         .create(personObject)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setNotificationMessage(`Added ${returnedPerson.name}`)
+          setNotification({ message: `Added ${returnedPerson.name}`, error: false })
 
           setTimeout(() => {
-            setNotificationMessage(null)
+            setNotification({ message: null, error: false })
+          }, 3000)
+        })
+        .catch(error => {
+          setNotification({ message: error.response.data.error, error: true })
+
+          setTimeout(() => {
+            setNotification({ message: null, error: false })
           }, 3000)
         })
     }
@@ -153,13 +152,19 @@ const App = () => {
       phonebookService
         .deleteID(id)
         .then(() => {
+          console.log('hit here? ')
           setPersons(persons.filter(person => id !== person.id))
-          setNotificationMessage(`Deleted ${name}`)
+          setNotification({ message: `Deleted ${name}`, error: false })
 
           setTimeout(() => {
-            setNotificationMessage(null)
+            setNotification({ message: null, error: false })
           }, 3000)
         })
+        .catch(() => {
+          setNotification({ message: `Information of ${name} has already been removed from server`, error: true })
+          setPersons(persons.filter(person => person.id !== id))
+        })
+
     } else {console.log('no state update')}
   }
 
@@ -167,9 +172,9 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h2>Phonebook : most updated deploy to heroku</h2>
 
-      <Notification message={notificationMessage} isError={isError}/>
+      <Notification notification={notification} />
 
       <Filter filterName={filterName} handleFilterNameChange={handleFilterNameChange} />
       
