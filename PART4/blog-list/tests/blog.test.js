@@ -63,7 +63,7 @@ describe('post \'/api/blogs\'', () => {
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
 
-    const titles = blogsAtEnd.map(r=> r.title)
+    const titles = blogsAtEnd.map(r => r.title)
     expect(titles).toContain('Crystal Blog')
   })
 
@@ -115,6 +115,88 @@ describe('post \'/api/blogs\'', () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
   })
 })
+
+describe('delete \'/api/blogs/:id', () => {
+  test('succeeds with status code 204 if id is in valid mongoose format and exists', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(
+      helper.initialBlogs.length -1
+    )
+
+    const titles = blogsAtEnd.map(r => r.title)
+
+    expect(titles).not.toContain(blogToDelete.title)
+  })
+
+  test('succeeds with status code 204 if id is in valid mongoose format but does not exist', async () => {
+    const validNonexistingId = await helper.nonExistingId()
+
+    console.log('valid none existing id: ', validNonexistingId)
+
+    await api
+      .delete(`/api/blogs/${validNonexistingId}`)
+      .expect(204)
+  })
+
+  test('fails with status code 400 if id is in invalid format', async () => {
+    const invalidId = '2'
+
+    await api
+      .delete(`/api/blogs/${invalidId}`)
+      .expect(400)
+  })
+})
+
+describe('put \'/api/blogs/:id', () => {
+  test('updates likes of a blog post', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+
+    const updatedBlog = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send({
+        likes: 2
+      })
+      .expect(200)
+
+    expect(updatedBlog.body.likes).toBe(2)
+  })
+
+  test('fails with status code 404 if id is in valid mongoose format but does not exist', async () => {
+    const validNonexistingId = await helper.nonExistingId()
+
+    console.log('valid none existing id: ', validNonexistingId)
+
+    await api
+      .put(`/api/blogs/${validNonexistingId}`)
+      .send({
+        likes: 2
+      })
+      .expect(404)
+  })
+
+  test('fails with status code 400 if id is in invalid format', async () => {
+    const invalidId = '2'
+
+    await api
+      .put(`/api/blogs/${invalidId}`)
+      .send({
+        likes: 2
+      })
+      .expect(400)
+  })
+
+})
+
+
 
 afterAll(() => {
   mongoose.connection.close()
