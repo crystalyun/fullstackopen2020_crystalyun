@@ -2,10 +2,11 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-    "title": "blog title3", 
-    "author": "crystal2",
-    "url": "www.blog.com2",
-    "likes": 36
+    "title": "Microservices and the First Law of Distributed Objects", 
+    "author": "Martin Fowler",
+    "url": "https://martinfowler.com",
+    "likes": 0,
+    "userId": "5f04f6cb71c5db61cca94c14"
 
 }
 
