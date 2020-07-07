@@ -1,4 +1,5 @@
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const initialBlogs = [{
   title: 'React patterns',
@@ -25,6 +26,11 @@ const nonExistingId = async () => {
   return blog._id.toString()
 }
 
+const usersInDb = async () => {
+  const users = await User.find({}) // will have ._id, .__v, and .passwordHash
+  return users.map(u => u.toJSON()) // will not have ._id, .__v and .passwordHash && will have 'id' prop
+}
+
 module.exports = {
-  initialBlogs, blogsInDb, nonExistingId
+  initialBlogs, blogsInDb, nonExistingId, usersInDb
 }

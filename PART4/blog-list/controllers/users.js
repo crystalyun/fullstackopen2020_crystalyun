@@ -6,6 +6,10 @@ const User = require('../models/user')
 // user registration
 usersRouter.post('/', async (request, response) => {
   const body = request.body
+  
+  if ((body.password === undefined) || (body.password.length < 3)) {
+    return response.status(400).json({ error: 'password is a required field and 3 characters minimum' })
+  }
 
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(body.password, saltRounds)
@@ -21,8 +25,8 @@ usersRouter.post('/', async (request, response) => {
 })
 
 usersRouter.get('/', async (request, response) => {
-    const users = await User.find({})
-    response.json(users)
+  const users = await User.find({})
+  response.json(users)
 })
 
 module.exports = usersRouter
