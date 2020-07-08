@@ -1,6 +1,6 @@
 POST http://localhost:3003/api/blogs 
 Content-Type: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI1ZjA0ZjY4YjcxYzVkYjYxY2NhOTRjMTMiLCJpYXQiOjE1OTQxNjcxNDl9.unx4ghHS6evYeZZ7fuR-fd3fQn7qfe1CsXKowjLo2E1
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sdXVra2FpIiwiaWQiOiI1ZjA0ZjY4YjcxYzVkYjYxY2NhOTRjMTMiLCJpYXQiOjE1OTQxNjg3NjN9.-dRpN_Rf7gQkfVmclDYiNCMrrh2GabxRb-_huP5T_e4
 
 {
     "title": "my fabulous title", 
@@ -8,6 +8,5 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1sd
     "url": "https://crystalyun.com",
     "likes": 0,
     "userId": "5f04f6cb71c5db61cca94c14"
-
 }
 
