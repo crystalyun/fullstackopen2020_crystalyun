@@ -3,13 +3,53 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('./test_helper')
+
+let rootUserLoginSuccess
+let superUserLoginSuccess
+let rootUserId
+let superUserId
+
+beforeAll(async () => {
+  await User.deleteMany({})
+  const initialUsers = await helper.returnInitialUsers()
+
+  const userObjects = initialUsers.map(user => new User(user))
+  const promiseArray = userObjects.map(user => user.save())
+  const users = await Promise.all(promiseArray)
+
+  rootUserId = users[0]._id
+  superUserId = users[1]._id
+
+  const rootUserLogin = await api
+    .post('/api/login')
+    .send({
+      username: 'root',
+      password: 'rootpassword'
+    })
+
+  rootUserLoginSuccess = rootUserLogin.body
+
+  const superUserLogin = await api
+    .post('/api/login')
+    .send({
+      username: 'superuser',
+      password: 'superuserpassword'
+    })
+
+  superUserLoginSuccess = superUserLogin.body
+})
+
 
 beforeEach(async () => {
   await Blog.deleteMany({})
 
   const blogObjects = helper.initialBlogs
-    .map(blog => new Blog(blog))
+    .map(blog => new Blog({
+      ...blog,
+      user: rootUserId
+    }))
   const promiseArray = blogObjects.map(blog => blog.save())
   await Promise.all(promiseArray)
 })
@@ -46,7 +86,7 @@ describe('get \'/api/blogs\'', () => {
 })
 
 describe('post \'/api/blogs\'', () => {
-  test('a valid blog can be added', async () => {
+  test('a valid blog can be added by a verified user', async () => {
     const newBlog = {
       title: 'Crystal Blog',
       author: 'Crystal Yun',
@@ -56,6 +96,7 @@ describe('post \'/api/blogs\'', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -67,6 +108,25 @@ describe('post \'/api/blogs\'', () => {
     expect(titles).toContain('Crystal Blog')
   })
 
+  test('adding a blog fails with 401 if token is not provided', async () => {
+    const newBlog = {
+      title: 'Crystal Blog',
+      author: 'Crystal Yun',
+      url: 'https://crystalyun.com/',
+      likes: 4
+    }
+
+    const result = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+
+    expect(result.body).toEqual({ error: 'token missing' })
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+  })
+
   test('likes property defaults to 0 if unspecified', async () => {
     const newBlog = {
       title: 'Miranda Blog',
@@ -76,6 +136,7 @@ describe('post \'/api/blogs\'', () => {
 
     const savedBlog = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -92,6 +153,7 @@ describe('post \'/api/blogs\'', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send(newBlog)
       .expect(400)
 
@@ -108,6 +170,7 @@ describe('post \'/api/blogs\'', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send(newBlog)
       .expect(400)
 
@@ -117,12 +180,13 @@ describe('post \'/api/blogs\'', () => {
 })
 
 describe('delete \'/api/blogs/:id', () => {
-  test('succeeds with status code 204 if id is in valid mongoose format and exists', async () => {
+  test('succeeds with status code 204 if creator is the same person as the DELETE requester', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
@@ -136,22 +200,49 @@ describe('delete \'/api/blogs/:id', () => {
     expect(titles).not.toContain(blogToDelete.title)
   })
 
-  test('succeeds with status code 204 if id is in valid mongoose format but does not exist', async () => {
-    const validNonexistingId = await helper.nonExistingId()
+  test('fails with status code 401 if creator is NOT the same person as the DELETE requester', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
 
-    console.log('valid none existing id: ', validNonexistingId)
+    const result = await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${superUserLoginSuccess.token}`)
+      .expect(401)
 
-    await api
-      .delete(`/api/blogs/${validNonexistingId}`)
-      .expect(204)
+    expect(result.body).toEqual({ error: 'A blog can be deleted only by the user who added the blog' })
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
   })
 
   test('fails with status code 400 if id is in invalid format', async () => {
     const invalidId = '2'
 
-    await api
+    const result = await api
       .delete(`/api/blogs/${invalidId}`)
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .expect(400)
+
+    expect(result.body).toEqual({ error: 'malformatted id' })
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+  })
+
+  test('deleting a blog fails with 401 if token is not provided', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    const result = await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(401)
+
+    expect(result.body).toEqual({ error: 'token missing' })
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
   })
 })
 

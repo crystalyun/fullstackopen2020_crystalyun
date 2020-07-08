@@ -19,6 +19,7 @@ const errorHandler = (error, request, response, next) => {
 }
 
 const tokenExtractor = (request, response, next) => {
+  console.log('enter middleware?')
   const authorization = request.get('Authorization')
 
   if (authorization && authorization.toLowerCase().startsWith('bearer')) {
