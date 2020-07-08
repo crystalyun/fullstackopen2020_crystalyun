@@ -1,6 +1,7 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 // base binding will be /api/blogs
 
@@ -12,11 +13,28 @@ blogsRouter.get('/', async (request, response) => {
   // JSON.stringify then calls .toJSON attached to Blog model which will remove ._id and .__v fields
 })
 
+const getTokenFromAuthorizationHeader = request => {
+  const authorization = request.get('Authorization')
+
+  if (authorization && authorization.toLowerCase().startsWith('bearer')) {
+    return authorization.substring(7)
+  }
+
+  return null
+}
+
 blogsRouter.post('/', async (request, response) => {
-  const body = request.body
+  // adding new blogs is only possible if a valid token is sent with the HTTP POST request
+  const token = getTokenFromAuthorizationHeader(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
 
-  const user = await User.findById(body.userId)
+  if (!token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
 
+  const user = await User.findById(decodedToken.id)
+
+  // the user identified by the token is designated as the creator of the blog
   const blog = new Blog({
     ...request.body,
     user: user._id
