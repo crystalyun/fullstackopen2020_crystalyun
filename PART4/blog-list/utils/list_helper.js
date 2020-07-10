@@ -11,6 +11,10 @@ const totalLikes = (blogs) => {
 }
 
 const favoriteBlog = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+
   const reducer = (prev, current) => {
     return (prev.likes > current.likes) ? prev : current
   }
@@ -19,17 +23,25 @@ const favoriteBlog = (blogs) => {
 }
 
 const mostBlogs = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+
   const top = _.chain(blogs)
     .countBy('author')
     .map((value, key) => ({'author': key, 'blogs': value}))
     .maxBy('blogs')
     .value()
-  
-  return top 
+
+  return top
 }
 
 // https://dustinpfister.github.io/2018/11/15/lodash_sum/
 const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+
   const top = _.chain(blogs)
     .groupBy('author')
     .map(( objs, key ) => {

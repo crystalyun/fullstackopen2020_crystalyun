@@ -11,6 +11,7 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs.map(blog => blog.toJSON()))
   //response.json serializes `blogs`, an arry of objects (WHICH IS, IN JAVASCRIPT, AN OBJECT), to JSON. calls JSON.stringify under the hood.
   // JSON.stringify then calls .toJSON attached to Blog model which will remove ._id and .__v fields
+  // response.json(blogs) still works just fine
 })
 
 blogsRouter.post('/', async (request, response) => {
@@ -37,10 +38,12 @@ blogsRouter.post('/', async (request, response) => {
   })
   const savedBlog = await blog.save()
 
+  // remember to also update `User` model's `blogs` field
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
 
   response.status(201).json(savedBlog.toJSON())
+  // response.status(201).json(savedBlog) will also just work
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
@@ -58,15 +61,18 @@ blogsRouter.delete('/:id', async (request, response) => {
   }
 
   const blog = await Blog.findById(request.params.id)
-  const creatorId = blog.user.toString()
+  const user = await User.findById(decodedToken.id)
 
-  if (creatorId === decodedToken.id) {
-    await Blog.findByIdAndRemove(request.params.id)
-    response.status(204).end()
-  } else {
+  if (blog.user.toString() !== user.id.toString()) {
     response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog' })
   }
 
+  await blog.remove()
+  // remember to also update `User` model's `blogs` field
+  user.blogs = user.blogs.filter(b => b.id.toString() !== request.params.id.toString())
+  await user.save()
+
+  response.status(204).end()
 })
 
 blogsRouter.put('/:id', async (request, response) => {

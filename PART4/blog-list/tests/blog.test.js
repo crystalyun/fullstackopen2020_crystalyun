@@ -141,7 +141,10 @@ describe('post \'/api/blogs\'', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    expect(savedBlog.body.likes).toBe(0)
+    const blogsAtEnd = await helper.blogsInDb()
+    const added = blogsAtEnd.find(b => b.url === newBlog.url)
+
+    expect(added.likes).toBe(0)
   })
 
   test('if url property is missing from the request data, respond with 400 and the request fails', async() => {
@@ -181,8 +184,11 @@ describe('post \'/api/blogs\'', () => {
 
 describe('delete \'/api/blogs/:id', () => {
   test('succeeds with status code 204 if creator is the same person as the DELETE requester', async () => {
-    const blogsAtStart = await helper.blogsInDb()
-    const blogToDelete = blogsAtStart[0]
+    // const blogsAtStart = await helper.blogsInDb()
+    // const blogToDelete = blogsAtStart[0]
+
+    // use array destructuring instead to teas out the first element in the array
+    const [ blogToDelete ] = await helper.blogsInDb()
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
@@ -247,19 +253,25 @@ describe('delete \'/api/blogs/:id', () => {
 })
 
 describe('put \'/api/blogs/:id', () => {
-  test('updates likes of a blog post', async () => {
-    const blogsAtStart = await helper.blogsInDb()
-    const blogToUpdate = blogsAtStart[0]
+  test.only('updates likes of a blog post', async () => {
+    // const blogsAtStart = await helper.blogsInDb()
+    // const blogToUpdate = blogsAtStart[0]
+
+    // instead of above two lines, i can just do array destructuring to retrieve first item in the array
+    const [ blogToUpdate ] = await helper.blogsInDb()
 
     const updatedBlog = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
       .send({
-        likes: 2
+        likes: blogToUpdate.likes + 1
       })
       .expect(200)
 
-    expect(updatedBlog.body.likes).toBe(2)
+    const blogsAtEnd = await helper.blogsInDb()
+    const edited = blogsAtEnd.find(b => b.url === blogToUpdate.url)
+    expect(edited.likes).toBe(blogToUpdate.likes + 1)
   })
+
 
   test('fails with status code 404 if id is in valid mongoose format but does not exist', async () => {
     const validNonexistingId = await helper.nonExistingId()
