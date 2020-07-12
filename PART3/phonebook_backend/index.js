@@ -9,13 +9,11 @@ const Person = require('./models/person')
 app.use(express.static('build'))
 app.use(express.json())
 
-morgan.token('requestBody', function(req, res) {
+morgan.token('requestBody', function(req) {
   if ( req.method === 'POST' ) {
     console.log(typeof req.body)
     return JSON.stringify(req.body)
   }
-
-  return
 })
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :requestBody'))
