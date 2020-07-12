@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Axios from 'axios'
 
 const LoginForm = (props) => {
   return (
@@ -33,14 +34,50 @@ const LoginForm = (props) => {
 }
 
 
-const BlogLists = ({blogs, user, handleLogout}) => {
+const BlogLists = ({blogs}) => {
   return (
     <div>
-      <h2>blogs</h2>
-      <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
+    </div>
+  )
+}
+
+const BlogForm = (props) => {
+  return (
+    <div>
+      <h2>create new</h2>
+      <form onSubmit={props.handleCreateNewBlog}>
+        <div>
+          title:
+            <input 
+              type="text"
+              value={props.title}
+              name="Title"
+              onChange={({ target }) => props.setTitle(target.value)}
+            />
+        </div>
+        <div>
+          author:
+            <input 
+              type="text"
+              value={props.author}
+              name="Author"
+              onChange={({ target }) => props.setAuthor(target.value)}
+            />
+        </div>
+        <div>
+          url:
+            <input 
+              type="text"
+              value={props.url}
+              name="Url"
+              onChange={({ target }) => props.setUrl(target.value)}
+            />
+        </div>
+        <button type="submit">create</button>
+      </form>
     </div>
   )
 }
@@ -52,6 +89,9 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [user, setUser] = useState(null)
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -92,6 +132,21 @@ const App = () => {
     setUser(null)
   }
 
+  const handleCreateNewBlog = async (event) => {
+    event.preventDefault()
+    console.log('create new blog button clicked')
+
+    blogService.setToken(user.token)
+    const response = await blogService.create({ title, author, url })
+    console.log('new blog posted', response)
+
+    setBlogs(blogs.concat(response))
+
+    setUrl('')
+    setTitle('')
+    setAuthor('')
+  }
+
   if (user === null) {
     return (
       <LoginForm 
@@ -105,11 +160,25 @@ const App = () => {
   }
 
   return (
-      <BlogLists
-        blogs={blogs}
-        user={user}
-        handleLogout={handleLogout}
-      />
+      <>
+        <h2>blogs</h2>
+        <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
+        <BlogForm 
+          title={title}
+          setTitle={setTitle}
+          author={author}
+          setAuthor={setAuthor}
+          url={url}
+          setUrl={setUrl}
+          handleCreateNewBlog={handleCreateNewBlog}
+        />
+        <BlogLists
+          blogs={blogs}
+          user={user}
+          handleLogout={handleLogout}
+        />
+      </>
+      
   )
 }
 
