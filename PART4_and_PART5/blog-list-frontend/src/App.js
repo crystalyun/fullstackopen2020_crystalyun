@@ -1,87 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import Blog from './components/Blog'
+import BlogLists from './components/BlogLists'
+import LoginForm from './components/LoginForm'
+import BlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import Axios from 'axios'
 
-const LoginForm = (props) => {
+
+const Notification = (props) => {
+  if (props.notification.message === null) {
+    return null
+  }
+
   return (
-    <div>
-      <h2>log in to application</h2>
-      <form onSubmit={props.handleLogin}>
-        <div>
-          username
-            <input
-              type="text"
-              value={props.username}
-              name="Username"
-              onChange={({ target }) => props.setUsername(target.value)}
-            />
-        </div>
-        <div>
-          password
-            <input
-              type="password"
-              value={props.password}
-              name="Password"
-              onChange={({ target }) => props.setPassword(target.value)}
-            />
-        </div>
-        <button type="submit">login</button>
-      </form>
+    <div className={props.notification.error ? "notification error" : "notification success"}>
+      {props.notification.message}
     </div>
   )
 }
-
-
-const BlogLists = ({blogs}) => {
-  return (
-    <div>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
-    </div>
-  )
-}
-
-const BlogForm = (props) => {
-  return (
-    <div>
-      <h2>create new</h2>
-      <form onSubmit={props.handleCreateNewBlog}>
-        <div>
-          title:
-            <input 
-              type="text"
-              value={props.title}
-              name="Title"
-              onChange={({ target }) => props.setTitle(target.value)}
-            />
-        </div>
-        <div>
-          author:
-            <input 
-              type="text"
-              value={props.author}
-              name="Author"
-              onChange={({ target }) => props.setAuthor(target.value)}
-            />
-        </div>
-        <div>
-          url:
-            <input 
-              type="text"
-              value={props.url}
-              name="Url"
-              onChange={({ target }) => props.setUrl(target.value)}
-            />
-        </div>
-        <button type="submit">create</button>
-      </form>
-    </div>
-  )
-}
-
 
 
 const App = () => {
@@ -92,6 +27,10 @@ const App = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const [notification, setNotification] = useState({
+    message: null,
+    error: false
+  })
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -124,6 +63,13 @@ const App = () => {
       setPassword('')
     } catch (exception) {
       // alert user of unsuccessful login
+      setNotification({ message: exception.response.data.error, error: true })
+
+      setTimeout(() => {
+        setNotification({ message: null, error: false })
+        setUsername('')
+        setPassword('')
+      }, 5000)
     }
   }
 
@@ -141,27 +87,36 @@ const App = () => {
     console.log('new blog posted', response)
 
     setBlogs(blogs.concat(response))
+    setNotification({message: `a new blog ${title} by ${author} added`, error: false})
 
-    setUrl('')
-    setTitle('')
-    setAuthor('')
+    setTimeout(() => {
+      setNotification({ message: null, error: false })
+      setUrl('')
+      setTitle('')
+      setAuthor('')
+    }, 5000)
   }
 
   if (user === null) {
     return (
-      <LoginForm 
-        handleLogin={handleLogin}
-        username={username}
-        setUsername={setUsername}
-        password={password}
-        setPassword={setPassword}
-      />
+      <>
+        <Notification notification={notification}/>
+        <LoginForm 
+          handleLogin={handleLogin}
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+        />
+      </>
+      
     )
   }
 
   return (
       <>
         <h2>blogs</h2>
+        <Notification notification={notification}/>
         <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
         <BlogForm 
           title={title}
