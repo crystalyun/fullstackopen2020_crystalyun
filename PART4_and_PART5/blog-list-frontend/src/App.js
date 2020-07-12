@@ -33,11 +33,11 @@ const LoginForm = (props) => {
 }
 
 
-const BlogLists = ({blogs, user}) => {
+const BlogLists = ({blogs, user, handleLogout}) => {
   return (
     <div>
       <h2>blogs</h2>
-      <p>{user.name} logged in</p>
+      <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
@@ -59,12 +59,25 @@ const App = () => {
     )  
   }, [])
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+    }
+  }, [])
+
+
   const handleLogin = async (event) => {
     event.preventDefault()
     console.log('logging in with', username, password)
     try {
       const user = await loginService.login({username, password})
-      console.log('user logged in is ', user)
+      console.log('user logged in is ', user) // `user` is a javascript object in the form of { token, username, name }
+
+      window.localStorage.setItem(
+        'loggedBlogappUser', JSON.stringify(user)
+      )
 
       setUser(user)
       setUsername('')
@@ -72,7 +85,11 @@ const App = () => {
     } catch (exception) {
       // alert user of unsuccessful login
     }
-    
+  }
+
+  const handleLogout = (event) => {
+    window.localStorage.removeItem('loggedBlogappUser')
+    setUser(null)
   }
 
   if (user === null) {
@@ -91,6 +108,7 @@ const App = () => {
       <BlogLists
         blogs={blogs}
         user={user}
+        handleLogout={handleLogout}
       />
   )
 }
