@@ -1,23 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import BlogLists from './components/BlogLists'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
-
-
-const Notification = (props) => {
-  if (props.notification.message === null) {
-    return null
-  }
-
-  return (
-    <div className={props.notification.error ? "notification error" : "notification success"}>
-      {props.notification.message}
-    </div>
-  )
-}
-
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -31,6 +19,9 @@ const App = () => {
     message: null,
     error: false
   })
+
+  // references to components with ref
+  const BlogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -89,6 +80,9 @@ const App = () => {
     setBlogs(blogs.concat(response))
     setNotification({message: `a new blog ${title} by ${author} added`, error: false})
 
+    // close create new blog form by changing the component `Togglable` `visible` state to false
+    BlogFormRef.current.toggleVisibility()
+
     setTimeout(() => {
       setNotification({ message: null, error: false })
       setUrl('')
@@ -118,15 +112,20 @@ const App = () => {
         <h2>blogs</h2>
         <Notification notification={notification}/>
         <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
-        <BlogForm 
-          title={title}
-          setTitle={setTitle}
-          author={author}
-          setAuthor={setAuthor}
-          url={url}
-          setUrl={setUrl}
-          handleCreateNewBlog={handleCreateNewBlog}
-        />
+
+        <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
+          <BlogForm 
+            title={title}
+            setTitle={setTitle}
+            author={author}
+            setAuthor={setAuthor}
+            url={url}
+            setUrl={setUrl}
+            handleCreateNewBlog={handleCreateNewBlog}
+          />
+        </Togglable>
+
+        
         <BlogLists
           blogs={blogs}
           user={user}
