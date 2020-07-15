@@ -20,10 +20,12 @@ const App = () => {
   // references to components with ref
   const BlogFormRef = useRef()
 
+  // question for 5.9 : can i dynamically refresh/update when the likes ranking changes? not just for an initial load.
+  // google useeffect usestate infinite loop
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    blogService.getAll().then(blogs => {
+      setBlogs([...blogs].sort((a,b) => b.likes - a.likes))
+    }) 
   }, [])
 
   useEffect(() => {
@@ -33,7 +35,6 @@ const App = () => {
       setUser(user)
     }
   }, [])
-
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -98,7 +99,7 @@ const App = () => {
 
     const response = await blogService.update(id, blogObjectUpdated)
     console.log('likes count updated : ', response)
-    
+
     setBlogs(blogs.map((blog) => blog.id === response.id ? { ...blog, likes: response.likes } : blog))
   }
 
