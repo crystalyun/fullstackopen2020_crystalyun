@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-const Blog = ({ blog }) => {
+const Blog = ({ blog, handleIncrementLikesByOne }) => {
   const [ showDetails, setShowDetails ] = useState(false)
 
   const hideWhenShowDetails = { display: showDetails ? 'none' : '' }
@@ -7,6 +7,12 @@ const Blog = ({ blog }) => {
 
   const toggleVisibility = () => {
     setShowDetails(!showDetails)
+  }
+
+  const incrementLikesByOne = () => {
+    console.log('blog object received : ', blog )
+
+    handleIncrementLikesByOne(blog)
   }
 
   const blogStyle = {
@@ -35,7 +41,7 @@ const Blog = ({ blog }) => {
       <div style={{ ...showWhenShowDetails, ...blogStyle }}>
         <div>{blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button></div>
         <div>{blog.url}</div>
-        <div>likes {blog.likes} <button>like</button></div>
+        <div>likes {blog.likes} <button onClick={incrementLikesByOne}>like</button></div>
         <div>{blog.user.name}</div>
       </div>
     </div>

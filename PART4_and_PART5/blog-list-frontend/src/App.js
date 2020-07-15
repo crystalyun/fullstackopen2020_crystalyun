@@ -82,6 +82,26 @@ const App = () => {
     }, 5000)
   }
 
+  const handleIncrementLikesByOne = async (blogObject) => {
+    console.log('blog object received in App component : ', blogObject)
+    const { user, likes, author, title, url, id } = blogObject
+
+    const blogObjectUpdated = {
+      user: user.id,
+      likes: likes + 1,
+      author,
+      title,
+      url
+    }
+
+    console.log('blog object to be sent to the server', blogObjectUpdated)
+
+    const response = await blogService.update(id, blogObjectUpdated)
+    console.log('likes count updated : ', response)
+    
+    setBlogs(blogs.map((blog) => blog.id === response.id ? { ...blog, likes: response.likes } : blog))
+  }
+
   if (user === null) {
     return (
       <>
@@ -113,8 +133,7 @@ const App = () => {
         
         <BlogLists
           blogs={blogs}
-          user={user}
-          handleLogout={handleLogout}
+          handleIncrementLikesByOne={handleIncrementLikesByOne}
         />
       </>
       
