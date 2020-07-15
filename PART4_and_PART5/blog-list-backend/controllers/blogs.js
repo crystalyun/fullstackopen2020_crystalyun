@@ -37,14 +37,16 @@ blogsRouter.post('/', async (request, response) => {
     ...request.body,
     user: user._id
   })
+
   const savedBlog = await blog.save()
 
   // remember to also update `User` model's `blogs` field
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
 
-  response.status(201).json(savedBlog.toJSON())
-  // response.status(201).json(savedBlog) will also just work
+  const blogCreated = await Blog.findById(savedBlog._id).populate('user', { blogs: 0 })
+  response.status(201).json(blogCreated.toJSON())
+  // response.status(201).json(blogCreated) will also just work
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
@@ -65,7 +67,7 @@ blogsRouter.delete('/:id', async (request, response) => {
   const user = await User.findById(decodedToken.id)
 
   if (blog.user.toString() !== user.id.toString()) {
-    response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog' })
+    return response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog' })
   }
 
   await blog.remove()

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-const Blog = ({ blog, handleIncrementLikesByOne }) => {
+const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
   const [ showDetails, setShowDetails ] = useState(false)
 
   const hideWhenShowDetails = { display: showDetails ? 'none' : '' }
@@ -9,12 +9,6 @@ const Blog = ({ blog, handleIncrementLikesByOne }) => {
     setShowDetails(!showDetails)
   }
 
-  const incrementLikesByOne = () => {
-    console.log('blog object received : ', blog )
-
-    handleIncrementLikesByOne(blog)
-  }
-
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 5,
@@ -22,8 +16,6 @@ const Blog = ({ blog, handleIncrementLikesByOne }) => {
     marginBottom: 5,
     borderWidth: 1
   }
-
-  console.log('rerendering Blog component...')
 
   // reasons why i cannot reuse Togglable component
   // 1. div style stacking (eg. hideWhenShowDetails + blogStyle) required
@@ -41,8 +33,11 @@ const Blog = ({ blog, handleIncrementLikesByOne }) => {
       <div style={{ ...showWhenShowDetails, ...blogStyle }}>
         <div>{blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button></div>
         <div>{blog.url}</div>
-        <div>likes {blog.likes} <button onClick={incrementLikesByOne}>like</button></div>
+        <div>likes {blog.likes} <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
         <div>{blog.user.name}</div>
+        <div style={{ display: user.username === blog.user.username ? '' : 'none' }}>
+          <button onClick={() => handleRemoveBlog(blog)}>remove</button>
+        </div>
       </div>
     </div>
   )
