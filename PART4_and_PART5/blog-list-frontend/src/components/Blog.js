@@ -19,14 +19,14 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
 
   // reasons why i cannot reuse Togglable component
   // 1. div style stacking (eg. hideWhenShowDetails + blogStyle) required
-  // 2. i need to add blog metadata within this component. such as 
-  // {blog.title} {blog.author} etc. Togglable component uses {props.children} which in this case not useful. 
+  // 2. i need to add blog metadata within this component. such as
+  // {blog.title} {blog.author} etc. Togglable component uses {props.children} which in this case not useful.
   // 3. also incrementing likes by 1 feature on clicking `like` butrton is not accomodated in Togglable component.
 
   return (
     <div>
       {/* need to stack style = {blogStyle} */}
-      <div style={{ ...hideWhenShowDetails, ...blogStyle }}> 
+      <div style={{ ...hideWhenShowDetails, ...blogStyle }}>
         {blog.title} {blog.author}
         <button onClick={toggleVisibility}>view</button>
       </div>

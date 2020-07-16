@@ -25,7 +25,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs => {
       setBlogs([...blogs].sort((a,b) => b.likes - a.likes))
-    }) 
+    })
   }, [])
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const App = () => {
     event.preventDefault()
     console.log('logging in with', username, password)
     try {
-      const user = await loginService.login({username, password})
+      const user = await loginService.login({ username, password })
       console.log('user logged in is ', user) // `user` is a javascript object in the form of { token, username, name }
 
       window.localStorage.setItem(
@@ -73,7 +73,7 @@ const App = () => {
     console.log('new blog posted', response)
 
     setBlogs(blogs.concat(response))
-    setNotification({message: `a new blog ${blogObject.title} by ${blogObject.author} added`, error: false})
+    setNotification({ message: `a new blog ${blogObject.title} by ${blogObject.author} added`, error: false })
 
     // close create new blog form by changing the component `Togglable` `visible` state to false
     BlogFormRef.current.toggleVisibility()
@@ -105,14 +105,14 @@ const App = () => {
 
   const handleRemoveBlog = async ({ id, title, author }) => {
     console.log('remove button clicked. blog id to delete is ', id)
-    
+
     if (window.confirm(`Remove blog ${title} by ${author}`)) {
       try {
         blogService.setToken(user.token)
         await blogService.deleteBlog(id)
         setBlogs(blogs.filter(blog => blog.id !== id))
       } catch (exception) {
-        setNotification({message: exception.response.data.error, error: true})
+        setNotification({ message: exception.response.data.error, error: true })
         setTimeout(() => {
           setNotification({ message: null, error: false })
         }, 5000)
@@ -124,7 +124,7 @@ const App = () => {
     return (
       <>
         <Notification notification={notification}/>
-        <LoginForm 
+        <LoginForm
           handleLogin={handleLogin}
           username={username}
           setUsername={setUsername}
@@ -132,31 +132,31 @@ const App = () => {
           setPassword={setPassword}
         />
       </>
-      
+
     )
   }
 
   return (
-      <>
-        <h2>blogs</h2>
-        <Notification notification={notification}/>
-        <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
+    <>
+      <h2>blogs</h2>
+      <Notification notification={notification}/>
+      <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
 
-        <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
-          <BlogForm 
-            handleCreateNewBlog={handleCreateNewBlog}
-          />
-        </Togglable>
-
-        
-        <BlogLists
-          blogs={blogs}
-          handleIncrementLikesByOne={handleIncrementLikesByOne}
-          handleRemoveBlog={handleRemoveBlog}
-          user={user}
+      <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
+        <BlogForm
+          handleCreateNewBlog={handleCreateNewBlog}
         />
-      </>
-      
+      </Togglable>
+
+
+      <BlogLists
+        blogs={blogs}
+        handleIncrementLikesByOne={handleIncrementLikesByOne}
+        handleRemoveBlog={handleRemoveBlog}
+        user={user}
+      />
+    </>
+
   )
 }
 
