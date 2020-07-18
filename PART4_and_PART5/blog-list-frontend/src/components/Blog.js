@@ -26,11 +26,11 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
   return (
     <div>
       {/* need to stack style = {blogStyle} */}
-      <div style={{ ...hideWhenShowDetails, ...blogStyle }}>
+      <div style={{ ...hideWhenShowDetails, ...blogStyle }} className='blogDefaultView'>
         {blog.title} {blog.author}
         <button onClick={toggleVisibility}>view</button>
       </div>
-      <div style={{ ...showWhenShowDetails, ...blogStyle }}>
+      <div style={{ ...showWhenShowDetails, ...blogStyle }} className='blogDetailsView'>
         <div>{blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button></div>
         <div>{blog.url}</div>
         <div>likes {blog.likes} <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
