@@ -7,6 +7,8 @@ import { prettyDom, prettyDOM } from '@testing-library/dom'
 describe('<Blog />', () => {
     let component
 
+    const mockClickHandler = jest.fn()
+
     const blog = {
         id: 1,
         title: 'my blog title',
@@ -28,7 +30,11 @@ describe('<Blog />', () => {
 
     beforeEach(() => {
         component = render(
-            <Blog blog={blog} user={user}/>
+            <Blog 
+              blog={blog}
+              user={user}
+              handleIncrementLikesByOne={mockClickHandler}
+            />
         )
     })
 
@@ -54,6 +60,16 @@ describe('<Blog />', () => {
         expect(detailedView).toHaveTextContent('https://naver.com')
         expect(detailedView).toHaveTextContent('likes 8')
         expect(detailedView).not.toHaveStyle('display: none')
+    })
+
+    test.only('when like button is clicked twice, the event handler the component received as props is called twice.', () => {
+        const button = component.getByText('like')
+        fireEvent.click(button)
+        fireEvent.click(button)
+
+        expect(mockClickHandler.mock.calls).toHaveLength(2)
+
+        expect(mockClickHandler).toHaveBeenCalledWith(blog)
     })
 })
 

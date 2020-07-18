@@ -33,7 +33,7 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
       <div style={{ ...showWhenShowDetails, ...blogStyle }} className='blogDetailsView'>
         <div>{blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button></div>
         <div>{blog.url}</div>
-        <div>likes {blog.likes} <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
+        <div className='likesCount'>likes {blog.likes} <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
         <div>{blog.user.name}</div>
         <div style={{ display: user.username === blog.user.username ? '' : 'none' }}>
           <button onClick={() => handleRemoveBlog(blog)}>remove</button>
