@@ -1,7 +1,8 @@
 import React from 'react'
 import Blog from './Blog'
-import { render, prettyDOM } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
+import { prettyDom, prettyDOM } from '@testing-library/dom'
 
 describe('<Blog />', () => {
     let component
@@ -43,6 +44,16 @@ describe('<Blog />', () => {
         expect(detailedView).toHaveTextContent('https://naver.com')
         expect(detailedView).toHaveTextContent('likes 8')
         expect(detailedView).toHaveStyle('display: none')
+    })
+
+    test('when view button is clicked, the component shows detailed view of a blog including url and number of likes', () => {
+        const button = component.getByText('view')
+        fireEvent.click(button)
+
+        const detailedView = component.container.querySelector('.blogDetailsView')
+        expect(detailedView).toHaveTextContent('https://naver.com')
+        expect(detailedView).toHaveTextContent('likes 8')
+        expect(detailedView).not.toHaveStyle('display: none')
     })
 })
 
