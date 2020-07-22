@@ -24,10 +24,10 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
   // 3. also incrementing likes by 1 feature on clicking `like` butrton is not accomodated in Togglable component.
 
   return (
-    <div>
+    <div className='blog'>
       {/* need to stack style = {blogStyle} */}
       <div style={{ ...hideWhenShowDetails, ...blogStyle }} className='blogDefaultView'>
-        {blog.title} {blog.author}
+        <span className='blogInfo'>{blog.title} {blog.author}</span>
         <button onClick={toggleVisibility}>view</button>
       </div>
       <div style={{ ...showWhenShowDetails, ...blogStyle }} className='blogDetailsView'>

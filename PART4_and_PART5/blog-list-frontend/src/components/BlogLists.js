@@ -3,7 +3,7 @@ import React from 'react'
 
 const BlogLists = ({ blogs, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
   return (
-    <div>
+    <div className='blogList'>
       {blogs.map(blog =>
         <Blog
           key={blog.id}

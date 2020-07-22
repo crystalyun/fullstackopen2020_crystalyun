@@ -54,12 +54,13 @@ describe('Blog app', function() {
         .should('contain', 'my cool blog Crystal Wang')
     })
 
-    describe.only('and several blogs exists', function () {
+    describe('and several blogs exists', function () {
       beforeEach(function () {
         cy.createBlog({
           title: 'To Be Deleted Blog',
           author: 'J.K Rolling',
-          url: 'youtube.com'
+          url: 'youtube.com',
+          likes: 2
         })
         cy.createBlog({
           title: 'Likeable Blog',
@@ -70,8 +71,17 @@ describe('Blog app', function() {
         cy.createBlog({
           title: 'Filler Blog 2',
           author: 'Joshua Shen',
-          url: 'Boobies.com'
+          url: 'Boobies.com',
+          likes: 4
         })
+      })
+      it(' blogs are ordered according to likes with the blog with the most likes being first', function() {
+        const blogsList = ['Likeable Blog Jiyoung Yun', 'Filler Blog 2 Joshua Shen', 'To Be Deleted Blog J.K Rolling']
+        cy.get('.blogInfo')
+          .then((blogs) => {
+            const blogsText = blogs.toArray().map(blog => blog.innerText)
+            expect(blogsText).to.deep.eq(blogsList)
+          })
       })
 
       it('one of those can be liked', function() {
