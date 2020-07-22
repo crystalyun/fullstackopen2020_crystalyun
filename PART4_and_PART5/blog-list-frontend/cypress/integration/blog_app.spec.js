@@ -54,10 +54,10 @@ describe('Blog app', function() {
         .should('contain', 'my cool blog Crystal Wang')
     })
 
-    describe('and several blogs exists', function () {
+    describe.only('and several blogs exists', function () {
       beforeEach(function () {
         cy.createBlog({
-          title: 'Filler Blog 1',
+          title: 'To Be Deleted Blog',
           author: 'J.K Rolling',
           url: 'youtube.com'
         })
@@ -87,6 +87,48 @@ describe('Blog app', function() {
           .click()
           .parent()
           .contains('likes 7')
+      })
+
+      it('one of those can be deleted', function() {
+        cy.contains('To Be Deleted Blog')
+          .parent()
+          .contains('view')
+          .click()
+
+        cy.get('.blogDetailsView')
+          .contains('To Be Deleted Blog')
+          .parent()
+          .contains('remove')
+          .click()
+
+        cy.get('html')
+          .should('not.contain', 'To Be Deleted Blog')
+      })
+
+      describe('when a new user is created and logged in', function() {
+        beforeEach(function () {
+          const anotherUser = {
+            name: 'Deadmau5',
+            username: 'deadmouth5',
+            password: 'raiseyourweapon'
+          }
+          cy.request('POST', 'http://localhost:3003/api/users', anotherUser)
+
+          cy.login({ username: 'deadmouth5', password: 'raiseyourweapon' })
+        })
+
+        it('other users cannot delete blog created by another user', function() {
+          cy.contains('To Be Deleted Blog')
+            .parent()
+            .contains('view')
+            .click()
+
+          cy.get('.blogDetailsView')
+            .contains('To Be Deleted Blog')
+            .parent()
+            .get('#remove')
+            .should('have.css', 'display', 'none')
+        })
       })
     })
   })

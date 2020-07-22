@@ -35,7 +35,7 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
         <div>{blog.url}</div>
         <div className='likesCount'>likes {blog.likes} <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
         <div>{blog.user.name}</div>
-        <div style={{ display: user.username === blog.user.username ? '' : 'none' }}>
+        <div id='remove' style={{ display: user.username === blog.user.username ? '' : 'none' }}>
           <button onClick={() => handleRemoveBlog(blog)}>remove</button>
         </div>
       </div>
