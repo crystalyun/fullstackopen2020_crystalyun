@@ -53,5 +53,41 @@ describe('Blog app', function() {
       cy.get('.blogDefaultView')
         .should('contain', 'my cool blog Crystal Wang')
     })
+
+    describe('and several blogs exists', function () {
+      beforeEach(function () {
+        cy.createBlog({
+          title: 'Filler Blog 1',
+          author: 'J.K Rolling',
+          url: 'youtube.com'
+        })
+        cy.createBlog({
+          title: 'Likeable Blog',
+          author: 'Jiyoung Yun',
+          url: 'naver.com',
+          likes: 6
+        })
+        cy.createBlog({
+          title: 'Filler Blog 2',
+          author: 'Joshua Shen',
+          url: 'Boobies.com'
+        })
+      })
+
+      it('one of those can be liked', function() {
+        cy.contains('Likeable Blog')
+          .parent()
+          .contains('view')
+          .click()
+
+        cy.get('.blogDetailsView')
+          .contains('Likeable Blog')
+          .parent()
+          .contains('like')
+          .click()
+          .parent()
+          .contains('likes 7')
+      })
+    })
   })
 })
