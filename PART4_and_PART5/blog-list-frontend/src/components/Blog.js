@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import PropTypes from 'prop-types'
+
 const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
   const [ showDetails, setShowDetails ] = useState(false)
 
@@ -27,7 +29,8 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
     <div className='blog'>
       {/* need to stack style = {blogStyle} */}
       <div style={{ ...hideWhenShowDetails, ...blogStyle }} className='blogDefaultView'>
-        <span className='blogInfo'>{blog.title} {blog.author}</span>
+        <span>{blog.title}</span>{' '}
+        <span>{blog.author}</span>
         <button onClick={toggleVisibility}>view</button>
       </div>
       <div style={{ ...showWhenShowDetails, ...blogStyle }} className='blogDetailsView'>
@@ -41,6 +44,19 @@ const Blog = ({ blog, handleIncrementLikesByOne, handleRemoveBlog, user }) => {
       </div>
     </div>
   )
+}
+
+Blog.propTypes = {
+  blog: PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    author: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+  }).isRequired,
+  handleIncrementLikesByOne: PropTypes.func.isRequired,
+  handleRemoveBlog: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    username: PropTypes.string.isRequired
+  })
 }
 
 export default Blog

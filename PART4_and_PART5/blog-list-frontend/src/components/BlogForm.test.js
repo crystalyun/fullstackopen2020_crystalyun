@@ -1,16 +1,21 @@
 import React from 'react'
 import BlogForm from './BlogForm'
-import { render, fireEvent, act } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/extend-expect'
 import { prettyDOM } from '@testing-library/dom'
 
-test('form calls the event handler it received as props with the right details when a new blog is called.', async () => {
-  const promise = Promise.resolve()
-  const createBlogMockFunction = jest.fn(() => promise)
+test('form calls the event handler it received as props with the right details when a new blog is called.', () => {
+  const createBlogMockFunction = jest.fn()
 
   const component = render(
     <BlogForm handleCreateNewBlog={createBlogMockFunction}/>
   )
+
+  const blogData = {
+    author: 'Crystal Yun',
+    title: 'testing of forms could be easier',
+    url: 'https://naver.com'
+  }
 
   const form = component.container.querySelector('form')
   const titleInput = component.container.querySelector('#Title')
@@ -18,15 +23,15 @@ test('form calls the event handler it received as props with the right details w
   const urlInput = component.container.querySelector('#Url')
 
   fireEvent.change(titleInput, {
-    target: { value: 'testing of forms could be easier' }
+    target: { value: blogData.title }
   })
 
   fireEvent.change(authorInput, {
-    target: { value: 'Crystal Yun' }
+    target: { value: blogData.author }
   })
 
   fireEvent.change(urlInput, {
-    target: { value: 'https://naver.com' }
+    target: { value: blogData.url }
   })
 
   // debug
@@ -34,15 +39,8 @@ test('form calls the event handler it received as props with the right details w
 
   fireEvent.submit(form)
 
-  const newBlog = {
-    title: 'testing of forms could be easier',
-    author: 'Crystal Yun',
-    url: 'https://naver.com'
-  }
-
   expect(createBlogMockFunction.mock.calls).toHaveLength(1)
-  expect(createBlogMockFunction.mock.calls[0][0]).toEqual(newBlog)
+  expect(createBlogMockFunction.mock.calls[0][0]).toEqual(blogData)
   // alternatively, can test like this with jest custom matcher
-  expect(createBlogMockFunction).toHaveBeenCalledWith(newBlog)
-  await act(() => promise) // to suppress act warning : https://kentcdodds.com/blog/fix-the-not-wrapped-in-act-warning
+  expect(createBlogMockFunction).toHaveBeenCalledWith(blogData)
 })

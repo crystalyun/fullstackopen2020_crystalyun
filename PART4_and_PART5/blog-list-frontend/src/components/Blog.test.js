@@ -34,38 +34,31 @@ describe('<Blog />', () => {
         blog={blog}
         user={user}
         handleIncrementLikesByOne={mockClickHandler}
+        handleRemoveBlog={() => {}}
       />
     )
   })
 
   test('displays title and author, but does not render its url or number of likes by default', () => {
-    // use DOM querySelector to select an element that satisfies the css selector condition and then use jest-dom matcher toHaveTextContent over the HTML element.
-
-    const defaultView = component.container.querySelector('.blogDefaultView')
-    expect(defaultView).toHaveTextContent('my blog title')
-    expect(defaultView).toHaveTextContent('Crystal Yun')
-    expect(defaultView).not.toHaveStyle('display: none')
-
-    const detailedView = component.container.querySelector('.blogDetailsView')
-    expect(detailedView).toHaveTextContent('https://naver.com')
-    expect(detailedView).toHaveTextContent('likes 8')
-    expect(detailedView).toHaveStyle('display: none')
+    expect(component.getByText(blog.title)).toBeVisible()
+    expect(component.getByText(blog.author)).toBeVisible()
+    expect(component.getByText(blog.url)).not.toBeVisible()
+    expect(component.getByText(`likes ${blog.likes}`)).not.toBeVisible()
   })
 
   test('when view button is clicked, the component shows detailed view of a blog including url and number of likes', () => {
-    const button = component.getByText('view')
-    fireEvent.click(button)
+    const viewButton = component.getByText('view')
+    fireEvent.click(viewButton)
 
-    const detailedView = component.container.querySelector('.blogDetailsView')
-    expect(detailedView).toHaveTextContent('https://naver.com')
-    expect(detailedView).toHaveTextContent('likes 8')
-    expect(detailedView).not.toHaveStyle('display: none')
+    expect(component.getByText(`${blog.title} ${blog.author}`)).toBeVisible()
+    expect(component.getByText(blog.url)).toBeVisible()
+    expect(component.getByText(`likes ${blog.likes}`)).toBeVisible()
   })
 
   test('when like button is clicked twice, the event handler the component received as props is called twice.', () => {
-    const button = component.getByText('like')
-    fireEvent.click(button)
-    fireEvent.click(button)
+    const likeButton = component.getByText('like')
+    fireEvent.click(likeButton)
+    fireEvent.click(likeButton)
 
     expect(mockClickHandler.mock.calls).toHaveLength(2)
 

@@ -253,7 +253,7 @@ describe('delete \'/api/blogs/:id', () => {
 })
 
 describe('put \'/api/blogs/:id', () => {
-  test.only('updates likes of a blog post', async () => {
+  test('updates likes of a blog post', async () => {
     // const blogsAtStart = await helper.blogsInDb()
     // const blogToUpdate = blogsAtStart[0]
 
@@ -262,6 +262,7 @@ describe('put \'/api/blogs/:id', () => {
 
     const updatedBlog = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send({
         likes: blogToUpdate.likes + 1
       })
@@ -280,6 +281,7 @@ describe('put \'/api/blogs/:id', () => {
 
     await api
       .put(`/api/blogs/${validNonexistingId}`)
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send({
         likes: 2
       })
@@ -291,6 +293,7 @@ describe('put \'/api/blogs/:id', () => {
 
     await api
       .put(`/api/blogs/${invalidId}`)
+      .set('Authorization', `Bearer ${rootUserLoginSuccess.token}`)
       .send({
         likes: 2
       })

@@ -1,18 +1,29 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { useState } from 'react'
 
-const LoginForm = (props) => {
+const LoginForm = ({ handleLogin }) => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
+  const login = (event) => {
+    event.preventDefault()
+    console.log('logging in with', username, password)
+
+    handleLogin({ username, password })
+    setUsername('')
+    setPassword('')
+  }
+
   return (
     <div>
       <h2>log in to application</h2>
-      <form onSubmit={props.handleLogin}>
+      <form onSubmit={login}>
         <div>
             username
           <input
             id="username"
             type="text"
-            value={props.username}
-            onChange={({ target }) => props.setUsername(target.value)}
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
           />
         </div>
         <div>
@@ -20,22 +31,14 @@ const LoginForm = (props) => {
           <input
             id="password"
             type="password"
-            value={props.password}
-            onChange={({ target }) => props.setPassword(target.value)}
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
           />
         </div>
         <button id="login-button" type="submit">login</button>
       </form>
     </div>
   )
-}
-
-LoginForm.propTypes = {
-  handleLogin: PropTypes.func.isRequired,
-  username: PropTypes.string.isRequired,
-  setUsername: PropTypes.func.isRequired,
-  setPassword: PropTypes.func.isRequired,
-  password: PropTypes.string.isRequired
 }
 
 export default LoginForm

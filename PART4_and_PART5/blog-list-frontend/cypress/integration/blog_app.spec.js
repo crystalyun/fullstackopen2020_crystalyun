@@ -10,6 +10,13 @@ describe('Blog app', function() {
     }
     cy.request('POST', 'http://localhost:3003/api/users', user)
 
+    const anotherUser = {
+      name: 'Deadmau5',
+      username: 'deadmouth5',
+      password: 'raiseyourweapon'
+    }
+    cy.request('POST', 'http://localhost:3003/api/users', anotherUser)
+
     cy.visit('http://localhost:3000')
   })
 
@@ -31,9 +38,8 @@ describe('Blog app', function() {
       cy.get('#password').type('wrong')
       cy.get('#login-button').click()
 
-      cy.get('.notification.error')
-        .should('contain', 'invalid username or password')
-        .and('have.css', 'color', 'rgb(255, 0, 0)')
+      cy.contains('invalid username or password')
+        .should('have.css', 'color', 'rgb(255, 0, 0)')
     })
   })
 
@@ -50,95 +56,61 @@ describe('Blog app', function() {
       cy.get('#Url').type('wordpress.com')
       cy.get('#submitBlog').click()
 
-      cy.get('.blogDefaultView')
-        .should('contain', 'my cool blog Crystal Wang')
+      cy.contains('my cool blog Crystal Wang')
     })
 
-    describe('and several blogs exists', function () {
-      beforeEach(function () {
-        cy.createBlog({
-          title: 'To Be Deleted Blog',
-          author: 'J.K Rolling',
-          url: 'youtube.com',
-          likes: 2
-        })
-        cy.createBlog({
-          title: 'Likeable Blog',
-          author: 'Jiyoung Yun',
-          url: 'naver.com',
-          likes: 6
-        })
-        cy.createBlog({
-          title: 'Filler Blog 2',
-          author: 'Joshua Shen',
-          url: 'Boobies.com',
-          likes: 4
-        })
-      })
-      it(' blogs are ordered according to likes with the blog with the most likes being first', function() {
-        const blogsList = ['Likeable Blog Jiyoung Yun', 'Filler Blog 2 Joshua Shen', 'To Be Deleted Blog J.K Rolling']
-        cy.get('.blogInfo')
-          .then((blogs) => {
-            const blogsText = blogs.toArray().map(blog => blog.innerText)
-            expect(blogsText).to.deep.eq(blogsList)
-          })
+    describe('When several blogs created by many people exist', function() {
+      beforeEach(function() {
+        cy.login({ username: 'mluukkai', password: 'salainen' })
+        cy.createBlog({ author: 'John Doe', title: 'test1', url: 'http://example.com./test1' })
+        cy.createBlog({ author: 'John Doe', title: 'test2', url: 'http://example.com./test2' })
+        cy.contains('logout').click()
+        cy.login({ username: 'deadmouth5', password: 'raiseyourweapon' })
+        cy.createBlog({ author: 'Jane Doe', title: 'test3', url: 'http://example.com./test3' })
+
+        cy.contains('test1').parent().parent().as('blog1')
+        cy.contains('test2').parent().parent().as('blog2')
+        cy.contains('test3').parent().parent().as('blog3')
+
       })
 
-      it('one of those can be liked', function() {
-        cy.contains('Likeable Blog')
-          .parent()
-          .contains('view')
-          .click()
-
-        cy.get('.blogDetailsView')
-          .contains('Likeable Blog')
-          .parent()
-          .contains('like')
-          .click()
-          .parent()
-          .contains('likes 7')
+      it('Blogs can be liked', function() {
+        cy.get('@blog2').contains('view').click()
+        cy.get('@blog2').contains('like').click()
+        cy.get('@blog2').contains('likes 1')
       })
 
-      it('one of those can be deleted', function() {
-        cy.contains('To Be Deleted Blog')
-          .parent()
-          .contains('view')
-          .click()
+      it('they are ordered by number of likes', function() {
+        cy.get('@blog1').contains('view').click()
+        cy.get('@blog2').contains('view').click()
+        cy.get('@blog3').contains('view').click()
+        cy.get('@blog1').contains('like').as('like1')
+        cy.get('@blog2').contains('like').as('like2')
+        cy.get('@blog3').contains('like').as('like3')
 
-        cy.get('.blogDetailsView')
-          .contains('To Be Deleted Blog')
-          .parent()
-          .contains('remove')
-          .click()
+        cy.get('@like2').click()
+        cy.get('@like1').click()
+        cy.get('@like1').click()
+        cy.get('@like3').click()
+        cy.get('@like3').click()
+        cy.get('@like3').click()
 
-        cy.get('html')
-          .should('not.contain', 'To Be Deleted Blog')
+        cy.get('.blog').then(blogs => {
+          cy.wrap(blogs[0]).contains('likes 3')
+          cy.wrap(blogs[1]).contains('likes 2')
+          cy.wrap(blogs[2]).contains('likes 1')
+        })
       })
 
-      describe('when a new user is created and logged in', function() {
-        beforeEach(function () {
-          const anotherUser = {
-            name: 'Deadmau5',
-            username: 'deadmouth5',
-            password: 'raiseyourweapon'
-          }
-          cy.request('POST', 'http://localhost:3003/api/users', anotherUser)
+      it('the creator can delete a blog', function() {
+        cy.get('@blog3').contains('view').click()
+        cy.get('@blog3').contains('remove').click()
+        cy.get('html').should('not.contain', 'test3')
+      })
 
-          cy.login({ username: 'deadmouth5', password: 'raiseyourweapon' })
-        })
-
-        it('other users cannot delete blog created by another user', function() {
-          cy.contains('To Be Deleted Blog')
-            .parent()
-            .contains('view')
-            .click()
-
-          cy.get('.blogDetailsView')
-            .contains('To Be Deleted Blog')
-            .parent()
-            .get('#remove')
-            .should('have.css', 'display', 'none')
-        })
+      it('other uses cannot delete blog created by another user', function() {
+        cy.get('@blog2').contains('view').click()
+        cy.get('@blog2').contains('remove').should('not.be.visible')
       })
     })
   })
