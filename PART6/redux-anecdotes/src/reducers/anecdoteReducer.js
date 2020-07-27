@@ -31,7 +31,12 @@ const reducer = (state = initialState, action) => {
       } else { return ele }
     })
     return newState
+  } else if (action.type === 'ADD_ANECDOTE') {
+    const newAnecdote = asObject(action.data.content)
+    return [ ...state, newAnecdote ]
   }
+
+
 
   return state
 }
