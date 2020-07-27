@@ -41,4 +41,19 @@ const reducer = (state = initialState, action) => {
   return state
 }
 
+// define two functions that create action-objects
+export const addVote = (id) => {
+  return {
+    type: 'INCREMENT_VOTE',
+    data: { id }
+  }
+}
+
+export const addAnecdoteOf = (content) => {
+  return {
+    type: 'ADD_ANECDOTE',
+    data: { content }
+  }
+}
+
 export default reducer
