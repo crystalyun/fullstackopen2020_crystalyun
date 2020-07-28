@@ -1,4 +1,4 @@
-const notificationReducer = (state = 'placeholder', action) => {
+const notificationReducer = (state = null, action) => {
     console.log('action hit notification reducer')
     console.log('print out action in notification reducer ', action)
     switch (action.type) {
