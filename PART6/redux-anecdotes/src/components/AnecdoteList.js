@@ -6,6 +6,7 @@ import { displayNotification } from '../reducers/notificationReducer'
 const AnecdoteList = () => {
     const dispatch = useDispatch()
     const anecdotes = useSelector(state => state.anecdotes)
+    const searchMessage = useSelector(state => state.filter)
 
     const vote = ({ id, content }) => {
         dispatch(addVote(id))
@@ -13,7 +14,11 @@ const AnecdoteList = () => {
     }
 
     const byVotes = (a1, a2) => a2.votes - a1.votes
-    const sortedAnecdotes = [ ...anecdotes ].sort(byVotes)
+
+    const filteredAnecdotes = anecdotes.filter(ele => {
+      return (ele.content).includes(searchMessage)
+    })
+    const sortedAnecdotes = [ ...filteredAnecdotes ].sort(byVotes)
 
     return (
         <>
