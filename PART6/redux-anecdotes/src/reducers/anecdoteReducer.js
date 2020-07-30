@@ -33,10 +33,21 @@ export const addVote = (id) => {
   }
 }
 
-export const addAnecdoteOf = (data) => {
-  return {
-    type: 'ADD_ANECDOTE',
-    data
+// before using redux-thunk
+// export const addAnecdoteOf = (data) => {
+//   return {
+//     type: 'ADD_ANECDOTE',
+//     data
+//   }
+// }
+
+export const addAnecdoteOf = (content) => {
+  return async dispatch => {
+    const newNote = await anecdoteService.createNew(content)
+    dispatch({
+      type: 'ADD_ANECDOTE',
+      data: newNote
+    })
   }
 }
 
