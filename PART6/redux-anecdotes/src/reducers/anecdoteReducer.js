@@ -25,11 +25,23 @@ const anecdoteReducer = (state = [], action) => {
   }
 }
 
-// define two functions that create action-objects
-export const addVote = (id) => {
-  return {
-    type: 'INCREMENT_VOTE',
-    data: { id }
+// before using redux-thunk
+// export const addVote = (id) => {
+//   return {
+//     type: 'INCREMENT_VOTE',
+//     data: { id }
+//   }
+// }
+
+export const addVote = (anecdote) => {
+  return async dispatch => {
+    const updated = { ...anecdote, votes: anecdote.votes + 1 }
+    const updatedAnecdote = await anecdoteService.update(updated)
+    const id = updatedAnecdote.id
+    dispatch({
+      type: 'INCREMENT_VOTE',
+      data: { id }
+    })
   }
 }
 

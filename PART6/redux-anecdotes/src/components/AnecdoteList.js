@@ -8,9 +8,9 @@ const AnecdoteList = () => {
   const anecdotes = useSelector(state => state.anecdotes)
   const searchMessage = useSelector(state => state.filter)
 
-  const vote = ({ id, content }) => {
-    dispatch(addVote(id))
-    dispatch(displayNotification(`you voted '${content}'.`))
+  const vote = (anecdote) => {
+    dispatch(addVote(anecdote))
+    dispatch(displayNotification(`you voted '${anecdote.content}'.`))
   }
 
   const byVotes = (a1, a2) => a2.votes - a1.votes
