@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import App from './App'
 import store from './store'
 
+// redux store is passed to all of the components through props
 ReactDOM.render(
   <Provider store={store}>
     <App />
