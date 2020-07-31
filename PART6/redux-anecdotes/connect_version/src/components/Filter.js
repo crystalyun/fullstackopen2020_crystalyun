@@ -1,14 +1,13 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { connect } from 'react-redux'
 import { filterMessage } from '../reducers/filterReducer'
 
-const Filter = () => {
-  const dispatch = useDispatch()
-
+const Filter = (props) => {
   const handleChange = (event) => {
     // input-field value is in variable event.target.value
     console.log('print out what is typed : ', event.target.value)
-    dispatch(filterMessage(event.target.value))
+
+    props.filterMessage(event.target.value)
   }
 
   const style = {
@@ -22,4 +21,8 @@ const Filter = () => {
   )
 }
 
-export default Filter
+// // redux connect() style 2
+export default connect(
+  null,
+  { filterMessage }
+)(Filter)
