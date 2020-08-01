@@ -1,9 +1,6 @@
 import anecdoteService from '../services/anecdotes'
 
 const anecdoteReducer = (state = [], action) => {
-  console.log('state now (anecdoteReducer): ', state)
-  console.log('action (anecdoteReducer)', action)
-
   switch (action.type) {
   case 'INCREMENT_VOTE': {
     const newState = state.map(ele => {
@@ -25,14 +22,6 @@ const anecdoteReducer = (state = [], action) => {
   }
 }
 
-// before using redux-thunk
-// export const addVote = (id) => {
-//   return {
-//     type: 'INCREMENT_VOTE',
-//     data: { id }
-//   }
-// }
-
 export const addVote = (anecdote) => {
   return async dispatch => {
     const updated = { ...anecdote, votes: anecdote.votes + 1 }
@@ -45,14 +34,6 @@ export const addVote = (anecdote) => {
   }
 }
 
-// before using redux-thunk
-// export const addAnecdoteOf = (data) => {
-//   return {
-//     type: 'ADD_ANECDOTE',
-//     data
-//   }
-// }
-
 export const addAnecdoteOf = (content) => {
   return async dispatch => {
     const newNote = await anecdoteService.createNew(content)
@@ -62,14 +43,6 @@ export const addAnecdoteOf = (content) => {
     })
   }
 }
-
-// before using redux-thunk
-// export const initializeAnecdotes = (anecdotes) => {
-//   return {
-//     type: 'INIT_ANECDOTES',
-//     data: anecdotes
-//   }
-// }
 
 export const initializeAnecdotes = () => {
   return async dispatch => {

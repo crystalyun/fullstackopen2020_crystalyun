@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { addAnecdoteOf } from '../reducers/anecdoteReducer'
-import { setNotification } from '../reducers/notificationReducer'
+import { showNotificationWithTimeout } from '../reducers/notificationReducer'
 
 const AnecdoteForm = (props) => {
   const addAnecdote = async (event) => {
@@ -10,7 +10,7 @@ const AnecdoteForm = (props) => {
     event.target.newAnecdote.value = ''
 
     props.addAnecdoteOf(content)
-    props.setNotification(`you added '${content}' anecdote.`, 5)
+    props.showNotificationWithTimeout(`you added '${content}' anecdote.`, 10)
   }
 
   return (
@@ -22,7 +22,7 @@ const AnecdoteForm = (props) => {
       </form>
     </>
   )
-}
+} 
 
 // redux connect() style 3
 // when the dispatched actions need to reference the props of the component, you need to use this style to make it work
@@ -31,8 +31,8 @@ const mapDispatchToProps = (dispatch) => {
     addAnecdoteOf: (value) => {
       dispatch(addAnecdoteOf(value))
     },
-    setNotification: (message, seconds) => {
-      dispatch(setNotification(message, seconds))
+    showNotificationWithTimeout: (message, seconds) => {
+      dispatch(showNotificationWithTimeout(message, seconds))
     }
   }
 }

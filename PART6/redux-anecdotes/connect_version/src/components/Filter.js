@@ -21,7 +21,7 @@ const Filter = (props) => {
   )
 }
 
-// // redux connect() style 2
+// redux connect() style 2
 export default connect(
   null,
   { filterMessage }
