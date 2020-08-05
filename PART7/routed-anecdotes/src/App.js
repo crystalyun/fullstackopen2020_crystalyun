@@ -81,9 +81,10 @@ const Notification = ({ notification }) => {
 
 const CreateNew = (props) => {
   const history = useHistory()
-  const content = useField('text')
-  const author = useField('text')
-  const info = useField('text')
+  // destructure because you do not want onReset prop to be filtered down to <input> tag as one of attributes.
+  const {onReset: resetContent, ...content} = useField('text')
+  const {onReset: resetAuthor, ...author} = useField('text')
+  const {onReset: resetInfo, ...info} = useField('text')
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -94,6 +95,13 @@ const CreateNew = (props) => {
       votes: 0
     })
     history.push('/')
+  }
+
+  const handleReset = (e) => {
+    e.preventDefault()
+    resetContent()
+    resetAuthor()
+    resetInfo()
   }
 
   return (
@@ -113,6 +121,7 @@ const CreateNew = (props) => {
           <input {...info} />
         </div>
         <button>create</button>
+        <button onClick={handleReset}>reset</button>
       </form>
     </div>
   )
