@@ -16,7 +16,7 @@ const AnecdoteList = () => {
   const byVotes = (a1, a2) => a2.votes - a1.votes
 
   const filteredAnecdotes = anecdotes.filter(ele => {
-    return (ele.content).includes(searchMessage)
+    return (ele.content.toLowerCase()).includes(searchMessage.toLowerCase())
   })
   const sortedAnecdotes = [ ...filteredAnecdotes ].sort(byVotes)
 

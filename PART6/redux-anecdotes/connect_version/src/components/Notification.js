@@ -8,18 +8,16 @@ const Notification = (props) => {
     borderWidth: 1
   }
 
-  if (props.notification) {
-    return (
-      <div style={style}>
-        {props.notification}
-      </div>
-    )
-  }
-
   if (!props.notification) {
     console.log('null notification message, render null')
     return null
   }
+
+  return (
+    <div style={style}>
+        {props.notification}
+    </div>
+  )
 }
 
 const mapStateToProps = (state) => {

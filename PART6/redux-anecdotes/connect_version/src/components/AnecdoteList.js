@@ -30,7 +30,7 @@ const mapStateToProps = (state) => {
   const byVotes = (a1, a2) => a2.votes - a1.votes
 
   const filteredAnecdotes = state.anecdotes.filter(ele => {
-    return (ele.content).includes(state.filter)
+    return (ele.content.toLowerCase()).includes(state.filter.toLowerCase())
   })
   
   const sortedAnecdotes = [ ...filteredAnecdotes ].sort(byVotes)
