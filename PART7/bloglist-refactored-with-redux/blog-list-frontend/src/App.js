@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
-import Blog from './components/Blog'
+import React, { useEffect, useState, useRef } from 'react'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
@@ -79,16 +78,13 @@ The cause of the issue is that when we navigate directly to the page of an indiv
 
 */
 
-
 const User = ({ user }) => {
   if (!user) {
     console.log('entered !user condition')
     return null
   } else {
     console.log('did not enter !user condition')
-    console.log('user object print out ', user)
   }
-
 
   return (
     <>
@@ -103,6 +99,28 @@ const User = ({ user }) => {
   )
 }
 
+const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
+
+  if (!blog) {
+    console.log('entered !blog condition')
+    return null
+  } else {
+    console.log('did not enter !blog condition')
+  }
+
+  return (
+    <>
+      <h2>{blog.title} {blog.author}</h2>
+
+      <a href={blog.url}>{blog.url}</a>
+
+      <div>{blog.likes} likes <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
+
+      added by {blog.user.name}
+    </>
+  )
+}
+
 const App = () => {
   const dispatch = useDispatch()
   const blogs = useSelector(state => state.blogs)
@@ -110,14 +128,26 @@ const App = () => {
   const loggedOnUser = useSelector(state => state.signedInUser)
 
   console.log('rerender App component...')
-  console.log('loggedOnUser is ', loggedOnUser)
 
   const padding = {
     padding: 5
   }
 
-  // references to components with ref
-  const BlogFormRef = useRef()
+  const blogStyle = {
+    paddingTop: 10,
+    paddingLeft: 5,
+    border: 'solid',
+    marginBottom: 5,
+    borderWidth: 1
+  }
+
+  const match = useRouteMatch('/blogs/:id')
+  const blog = match
+    ? blogs.find(b => b.id === match.params.id)
+    : null
+
+   // references to components with ref
+   const BlogFormRef = useRef()
 
   useEffect(() => {
     dispatch(initializeBlogs())
@@ -160,8 +190,7 @@ const App = () => {
         error: false,
         seconds: 10
       }))
-
-      // Close create new blog form by changing the component `Togglable` `visible` state to false
+      // Close `create new blog` form by changing the component `Togglable` `visible` state to false
       BlogFormRef.current.toggleVisibility()
     } catch(exception) {
       console.log(exception)
@@ -210,6 +239,9 @@ const App = () => {
         <Route path="/users">
           <Users />
         </Route>
+        <Route path="/blogs/:id">
+          <BlogInfo blog={blog} handleIncrementLikesByOne={handleIncrementLikesByOne}/>
+        </Route>
         <Route path="/">
           <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
             <BlogForm
@@ -218,14 +250,11 @@ const App = () => {
           </Togglable>
 
           {blogs.sort(byLikes).map(blog =>
-            <Blog
-              key={blog.id}
-              blog={blog}
-              handleIncrementLikesByOne={handleIncrementLikesByOne}
-              handleRemoveBlog={handleRemoveBlog}
-              user={loggedOnUser}
-            />
+            <div style={blogStyle} key={blog.id}>
+              <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+            </div>
           )}
+
         </Route>
       </Switch>
     </>
