@@ -141,6 +141,10 @@ const App = () => {
     borderWidth: 1
   }
 
+  const navBarStyle = {
+    backgroundColor: 'grey'
+  }
+
   const match = useRouteMatch('/blogs/:id')
   const blog = match
     ? blogs.find(b => b.id === match.params.id)
@@ -224,16 +228,16 @@ const App = () => {
 
   return (
     <>
-      <div>
+      <div style={navBarStyle}>
         <Link style={padding} to="/">home</Link>
         <Link style={padding} to="/users">users</Link>
+        <a>{loggedOnUser.name} logged in </a>
+        <a><button onClick={handleLogout}>logout</button></a>
       </div>
 
       <h2>blogs</h2>
 
       <Notification notification={notification} />
-
-      <p>{loggedOnUser.name} logged in<button onClick={handleLogout}>logout</button></p>
 
       <Switch>
         <Route path="/users">
