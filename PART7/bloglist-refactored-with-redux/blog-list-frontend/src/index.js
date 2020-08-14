@@ -7,6 +7,9 @@ import thunk from 'redux-thunk'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import storage from './utils/storage'
+import {
+    BrowserRouter as Router
+} from 'react-router-dom'
 import App from './App'
 import './index.css'
 
@@ -172,7 +175,9 @@ const store = createStore(
 
 ReactDOM.render(
   <Provider store={store}>
-      <App />
+      <Router>
+        <App />
+      </Router>
   </Provider>,
   document.getElementById('root')
 )

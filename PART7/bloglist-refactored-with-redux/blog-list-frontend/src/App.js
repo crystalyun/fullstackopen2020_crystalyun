@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
@@ -6,6 +6,54 @@ import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import { useSelector, useDispatch } from 'react-redux'
 import { addBlog, deleteBlog, addVote, initializeBlogs, showNotificationWithTimeout, logInUser, logOutUser, loadUser } from './index'
+import { Link, Switch, Route } from 'react-router-dom'
+import axios from 'axios'
+
+const Users = () => {
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    console.log('effect to fetch USER data')
+    const baseUrl = '/api/users'
+    axios
+      .get(baseUrl)
+      .then(response => {
+        setUsers(response.data)
+      })
+  },[])
+
+  const headings = [
+    '',
+    'blogs created'
+  ]
+
+  return (
+    <>
+      <h2>Users</h2>
+      <table>
+        <thead>
+          <tr>
+            {headings.map(h => 
+              <th key={h}>{h}</th>           
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(user => {
+            return (
+              <tr key={user.id}>
+                <td>{user.name}</td>
+                <td>{user.blogs.length}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </>
+  )
+}
+
+
 
 const App = () => {
   const dispatch = useDispatch()
@@ -15,6 +63,10 @@ const App = () => {
 
   console.log('rerender App component...')
   console.log('loggedOnUser is ', loggedOnUser)
+
+  const padding = {
+    padding: 5
+  }
 
   // references to components with ref
   const BlogFormRef = useRef()
@@ -95,27 +147,39 @@ const App = () => {
 
   return (
     <>
+      <div>
+        <Link style={padding} to="/">home</Link>
+        <Link style={padding} to="/users">users</Link>
+      </div>
+
       <h2>blogs</h2>
 
       <Notification notification={notification} />
 
       <p>{loggedOnUser.name} logged in<button onClick={handleLogout}>logout</button></p>
 
-      <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
-        <BlogForm
-          handleCreateNewBlog={handleCreateNewBlog}
-        />
-      </Togglable>
+      <Switch>
+        <Route path="/users">
+          <Users />
+        </Route>
+        <Route path="/">
+          <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
+            <BlogForm
+              handleCreateNewBlog={handleCreateNewBlog}
+            />
+          </Togglable>
 
-      {blogs.sort(byLikes).map(blog =>
-        <Blog
-          key={blog.id}
-          blog={blog}
-          handleIncrementLikesByOne={handleIncrementLikesByOne}
-          handleRemoveBlog={handleRemoveBlog}
-          user={loggedOnUser}
-        />
-      )}
+          {blogs.sort(byLikes).map(blog =>
+            <Blog
+              key={blog.id}
+              blog={blog}
+              handleIncrementLikesByOne={handleIncrementLikesByOne}
+              handleRemoveBlog={handleRemoveBlog}
+              user={loggedOnUser}
+            />
+          )}
+        </Route>
+      </Switch>
     </>
   )
 }
