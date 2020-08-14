@@ -5,6 +5,8 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
 import blogService from './services/blogs'
+import loginService from './services/login'
+import storage from './utils/storage'
 import App from './App'
 import './index.css'
 
@@ -105,10 +107,58 @@ export const showNotificationWithTimeout = ({message, error, seconds}) => {
     }
 }
 
+// `signed in user reducer` and action creators
+const signInUserReducer = (state = null, action) => {
+    switch (action.type) {
+        case 'LOGIN_USER':
+            return action.data
+        case 'LOGOUT_USER':
+            return null
+        default:
+            return state
+    }
+}
+
+export const loadUser = () => {
+    return (dispatch) => {
+        const user = storage.loadUser()
+        dispatch({
+            type: 'LOGIN_USER',
+            data: user
+        })
+    }
+}
+
+export const logInUser = (username, password) => {
+    return async (dispatch) => {
+        const user = await loginService.login({
+            username,
+            password
+        })
+        console.log('user logged in is ', user) // `user` is a javascript object in the form of { token, username, name }
+        storage.saveUser(user)
+        dispatch({
+            type: 'LOGIN_USER',
+            data: user
+        })
+        return user
+    }
+}
+
+export const logOutUser = () => {
+    return (dispatch) => {
+        storage.logoutUser()
+        dispatch({
+          type: 'LOGOUT_USER'
+        })
+    }
+}
+
 // combine reducers
 const reducer = combineReducers({
     blogs: blogReducer,
-    notification: notificationReducer
+    notification: notificationReducer,
+    signedInUser: signInUserReducer
 })
 
 

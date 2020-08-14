@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import Notification from './components/Notification'
-import loginService from './services/login'
-import storage from './utils/storage'
 import { useSelector, useDispatch } from 'react-redux'
-import { addBlog, deleteBlog, addVote, initializeBlogs, showNotificationWithTimeout } from './index'
+import { addBlog, deleteBlog, addVote, initializeBlogs, showNotificationWithTimeout, logInUser, logOutUser, loadUser } from './index'
 
 const App = () => {
-  const [user, setUser] = useState(null)
   const dispatch = useDispatch()
   const blogs = useSelector(state => state.blogs)
   const notification = useSelector(state => state.notification)
+  const loggedOnUser = useSelector(state => state.signedInUser)
 
   console.log('rerender App component...')
+  console.log('loggedOnUser is ', loggedOnUser)
 
   // references to components with ref
   const BlogFormRef = useRef()
@@ -24,24 +23,20 @@ const App = () => {
     dispatch(initializeBlogs())
   }, [dispatch])
 
-
   useEffect(() => {
-    const user = storage.loadUser()
-    setUser(user)
-  }, [])
+    dispatch(loadUser())
+  }, [dispatch])
 
-  const handleLogin = async ({ username, password }) => {
+  const handleLogin = ({ username, password }) => {
     try {
-      const user = await loginService.login({ username, password })
-      console.log('user logged in is ', user) // `user` is a javascript object in the form of { token, username, name }
-
-      storage.saveUser(user)
-      setUser(user)
-      dispatch(showNotificationWithTimeout({
-        message: `${user.name} welcome back!`,
-        error: false,
-        seconds: 10
-      }))
+      dispatch(logInUser(username, password))
+        .then(user => {
+          dispatch(showNotificationWithTimeout({
+            message: `${user.name} welcome back!`,
+            error: false,
+            seconds: 10
+          }))
+        })
     } catch (exception) {
       // alert user of unsuccessful login
       dispatch(showNotificationWithTimeout({
@@ -53,8 +48,7 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    storage.logoutUser()
-    setUser(null)
+    dispatch(logOutUser())
   }
 
   const handleCreateNewBlog = async (blogObject) => {
@@ -86,7 +80,7 @@ const App = () => {
     }
   }
 
-  if (!user) {
+  if (!loggedOnUser) {
     return (
       <>
         <Notification notification={notification}/>
@@ -105,7 +99,7 @@ const App = () => {
 
       <Notification notification={notification} />
 
-      <p>{user.name} logged in<button onClick={handleLogout}>logout</button></p>
+      <p>{loggedOnUser.name} logged in<button onClick={handleLogout}>logout</button></p>
 
       <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
         <BlogForm
@@ -119,7 +113,7 @@ const App = () => {
           blog={blog}
           handleIncrementLikesByOne={handleIncrementLikesByOne}
           handleRemoveBlog={handleRemoveBlog}
-          user={user}
+          user={loggedOnUser}
         />
       )}
     </>
