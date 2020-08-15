@@ -4,7 +4,7 @@ import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import { useSelector, useDispatch } from 'react-redux'
-import { addBlog, deleteBlog, addVote, initializeBlogs, showNotificationWithTimeout, logInUser, logOutUser, loadUser } from './index'
+import { addBlog, addVote, initializeBlogs, showNotificationWithTimeout, logInUser, logOutUser, loadUser } from './index'
 import { Link, Switch, Route, useRouteMatch } from 'react-router-dom'
 import axios from 'axios'
 
@@ -100,12 +100,28 @@ const User = ({ user }) => {
 }
 
 const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
+  const [comments, setComments] = useState(null)
 
-  if (!blog) {
-    console.log('entered !blog condition')
+  // useEffect only run when blog is available and loaded from server.
+  useEffect(() => {
+    if (blog) {
+      console.log('effect to fetch COMMENTS data once blog is loaded.')
+      axios
+      .get(`/api/blogs/${blog.id}/comments`)
+      .then(response => {
+        console.log('fetch COMMENTS promise fulfilled')
+        setComments(response.data)
+      })
+    } else {
+      console.log('wait fetch COMMENTS untill blog is fully loaded.')
+    }
+  }, [blog])
+
+  if (!blog || !comments) {
+    console.log('not all blog and comments loaded from backend.')
     return null
   } else {
-    console.log('did not enter !blog condition')
+    console.log('both blog and comments loaded from backend.')
   }
 
   return (
@@ -117,6 +133,11 @@ const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
       <div>{blog.likes} likes <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
 
       added by {blog.user.name}
+
+      <h4>comments</h4>
+      <ul>
+        {comments.map(comment => <li key={comment.id}>{comment.message}</li>)}
+      </ul>
     </>
   )
 }
@@ -205,14 +226,6 @@ const App = () => {
     dispatch(addVote(blog))
   }
 
-  const handleRemoveBlog = async ({ id, title, author }) => {
-    console.log('remove button clicked. blog id to delete is ', id)
-
-    if (window.confirm(`Remove blog ${title} by ${author}`)) {
-      dispatch(deleteBlog(id))
-    }
-  }
-
   if (!loggedOnUser) {
     return (
       <>
@@ -231,8 +244,8 @@ const App = () => {
       <div style={navBarStyle}>
         <Link style={padding} to="/">home</Link>
         <Link style={padding} to="/users">users</Link>
-        <a>{loggedOnUser.name} logged in </a>
-        <a><button onClick={handleLogout}>logout</button></a>
+        <span>{loggedOnUser.name} logged in </span>
+        <button onClick={handleLogout}>logout</button>
       </div>
 
       <h2>blogs</h2>

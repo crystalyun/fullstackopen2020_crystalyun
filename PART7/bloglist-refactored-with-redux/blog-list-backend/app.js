@@ -9,6 +9,7 @@ const loginRouter = require('./controllers/login')
 const usersRouter = require('./controllers/users')
 const blogsRouter = require('./controllers/blogs')
 const middleware = require('./utils/middleware')
+const commentsRouter = require('./controllers/comments')
 
 const mongoUrl = config.MONGODB_URI
 

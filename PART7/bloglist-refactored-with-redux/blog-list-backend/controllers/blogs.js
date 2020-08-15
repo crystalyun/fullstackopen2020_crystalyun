@@ -1,3 +1,4 @@
+const commentsRouter = require('./comments')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -7,7 +8,9 @@ const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
-    .find({}).populate('user', { blogs: 0 })
+    .find({})
+    .populate('user', { blogs: 0 })
+    .populate('comments', { blog: 0 })
   response.json(blogs.map(blog => blog.toJSON()))
   //response.json serializes `blogs`, an arry of objects (WHICH IS, IN JAVASCRIPT, AN OBJECT), to JSON. calls JSON.stringify under the hood.
   // JSON.stringify then calls .toJSON attached to Blog model which will remove ._id and .__v fields
@@ -103,5 +106,8 @@ blogsRouter.put('/:id', async (request, response) => {
     response.status(404).end()
   }
 })
+
+// nest `commentsRouter` router by attaching it to `blogsRouter` router as middleware.
+blogsRouter.use('/:blogId/comments', commentsRouter)
 
 module.exports = blogsRouter

@@ -6,4 +6,6 @@
 3. check if useRef need to be added. confirmed `create new blog` auto form wrap-up is broken..
 <Togglable buttonLabel="create new blog">
 
+4. consider adding comments to blog require auth token.
+
 */
