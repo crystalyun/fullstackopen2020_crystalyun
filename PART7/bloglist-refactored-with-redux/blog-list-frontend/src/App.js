@@ -101,6 +101,7 @@ const User = ({ user }) => {
 
 const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
   const [comments, setComments] = useState(null)
+  const [newComment, setNewComment] = useState('')
 
   // useEffect only run when blog is available and loaded from server.
   useEffect(() => {
@@ -124,6 +125,23 @@ const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
     console.log('both blog and comments loaded from backend.')
   }
 
+  const addNewComment = (event) => {
+    event.preventDefault()
+    console.log('user clicked `add comment` button.')
+
+    const commentObject = {
+      message: newComment
+    }
+
+    axios
+      .post(`/api/blogs/${blog.id}/comments`, commentObject)
+      .then(response => {
+        console.log('post COMMENTS promise fulfilled.')
+        setComments(comments.concat(response.data))
+        setNewComment('')
+      })
+  }
+
   return (
     <>
       <h2>{blog.title} {blog.author}</h2>
@@ -135,6 +153,17 @@ const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
       added by {blog.user.name}
 
       <h4>comments</h4>
+
+      <form onSubmit={addNewComment}>
+        <input
+          value={newComment}
+          onChange={({ target }) => setNewComment(target.value)}
+        />
+        <button type="submit">add comment</button>
+      </form>
+
+
+
       <ul>
         {comments.map(comment => <li key={comment.id}>{comment.message}</li>)}
       </ul>

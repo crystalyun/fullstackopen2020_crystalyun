@@ -39,9 +39,10 @@ commentsRouter.post('/', async (request, response) => {
     response.status(201).json(savedComment)
 })
 
+// find Comment by `any comments object whose prop `blog` ref ObjectId value is equal to `request.params.blogId`. 
 commentsRouter.get('/', async (request, response) => {
     const comment = await Comment
-      .find({})
+      .find({ 'blog': request.params.blogId })
 
     response.json(comment)
 })

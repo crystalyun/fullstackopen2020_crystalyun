@@ -8,4 +8,7 @@
 
 4. consider adding comments to blog require auth token.
 
+5. considering introducing form input custom hook for comments form and
+new blog form.
+
 */
