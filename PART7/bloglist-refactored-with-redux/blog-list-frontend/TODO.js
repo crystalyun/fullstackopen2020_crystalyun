@@ -1,14 +1,12 @@
 /*
-1. refactor Redux reducer / store modules
 
-2. perhaps use customHook for API calls? (blogService and users.getAll in User Component)
+1. consider adding comments to blog require auth token.
 
-3. check if useRef need to be added. confirmed `create new blog` auto form wrap-up is broken..
-<Togglable buttonLabel="create new blog">
+2. considering introducing form input custom hook for comments form and
+new blog form.&& and also id/password
 
-4. consider adding comments to blog require auth token.
+3. question : for signInUserReducer, is `storage` abstraction needed? i already have `signedInUser` redux store state.
 
-5. considering introducing form input custom hook for comments form and
-new blog form.
-
+    answer : yes you must. because when you refresh the page, localhost:3000, redux state `signedInUser` becomes null again..!!!!. so you need a local storage plus redux state.
+    so that upon page refresh, we pull a saved loggedinUser data in local storage and update redux `signedInUser` state accordingly, so that user does not need to login again after page refresh. (based on the assumption that frontend page is derived from the `signedInUser` redux state. on the assumption that when `signedInUser` redux state is null, frontend renders login page. when `signedInUser` redux state is not null and have user loggedIn data, frontend renders blogs list page.)
 */

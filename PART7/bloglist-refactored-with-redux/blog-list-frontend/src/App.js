@@ -1,175 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 import Notification from './components/Notification'
+import Users from './components/Users'
+import Blog from './components/Blog'
 import { useSelector, useDispatch } from 'react-redux'
-import { addBlog, addVote, initializeBlogs, showNotificationWithTimeout, logInUser, logOutUser, loadUser } from './index'
+import { addBlog, addVote, initializeBlogs } from './reducers/blogReducer'
+import { showNotificationWithTimeout } from './reducers/notificationReducer'
+import { logInUser, logOutUser, loadUser } from './reducers/signInUserReducer'
 import { Link, Switch, Route, useRouteMatch } from 'react-router-dom'
-import axios from 'axios'
-
-const Users = () => {
-  const [users, setUsers] = useState([])
-
-  useEffect(() => {
-    console.log('effect to fetch USER data')
-    const baseUrl = '/api/users'
-    axios
-      .get(baseUrl)
-      .then(response => {
-        console.log('fetch USER promise fulfilled')
-        setUsers(response.data)
-      })
-  },[])
-
-  const headings = [
-    '',
-    'blogs created'
-  ]
-
-  const match = useRouteMatch('/users/:id')
-  const user = match
-    ? users.find(user => user.id === match.params.id)
-    : null
-
-  return (
-    <>
-      <Switch>
-        <Route path='/users/:id'>
-          <User user={user} />
-        </Route>
-        <Route path='/users'> 
-        <h2>Users</h2>
-          <table>
-            <thead>
-              <tr>
-                {headings.map(h => 
-                  <th key={h}>{h}</th>           
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => {
-                return (
-                  <tr key={user.id}>  
-                    <td>
-                      <Link to={`/users/${user.id}`}>{user.name}</Link>
-                    </td>
-                    <td>
-                      {user.blogs.length}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </Route>
-      </Switch>
-    </>
-  )
-}
-
-/*
-NB: you will almost certainly stumble across the following error message during this exercise: TypeError: Cannot read property 'name' of undefined
-
-The error message will occur if you refresh the page for an individual user.
-
-The cause of the issue is that when we navigate directly to the page of an individual user, the React application has not yet received the data from the backend. One solution for fixing the problem is to use conditional rendering:
-
-*/
-
-const User = ({ user }) => {
-  if (!user) {
-    console.log('entered !user condition')
-    return null
-  } else {
-    console.log('did not enter !user condition')
-  }
-
-  return (
-    <>
-      <h2>{user.name}</h2>
-
-      <h4>added blogs</h4>
-
-      <ul>
-        {user.blogs.map((blog) => <li key={blog.id}>{blog.title}</li>)}
-      </ul>
-    </>
-  )
-}
-
-const BlogInfo = ({ blog, handleIncrementLikesByOne }) => {
-  const [comments, setComments] = useState(null)
-  const [newComment, setNewComment] = useState('')
-
-  // useEffect only run when blog is available and loaded from server.
-  useEffect(() => {
-    if (blog) {
-      console.log('effect to fetch COMMENTS data once blog is loaded.')
-      axios
-      .get(`/api/blogs/${blog.id}/comments`)
-      .then(response => {
-        console.log('fetch COMMENTS promise fulfilled')
-        setComments(response.data)
-      })
-    } else {
-      console.log('wait fetch COMMENTS untill blog is fully loaded.')
-    }
-  }, [blog])
-
-  if (!blog || !comments) {
-    console.log('not all blog and comments loaded from backend.')
-    return null
-  } else {
-    console.log('both blog and comments loaded from backend.')
-  }
-
-  const addNewComment = (event) => {
-    event.preventDefault()
-    console.log('user clicked `add comment` button.')
-
-    const commentObject = {
-      message: newComment
-    }
-
-    axios
-      .post(`/api/blogs/${blog.id}/comments`, commentObject)
-      .then(response => {
-        console.log('post COMMENTS promise fulfilled.')
-        setComments(comments.concat(response.data))
-        setNewComment('')
-      })
-  }
-
-  return (
-    <>
-      <h2>{blog.title} {blog.author}</h2>
-
-      <a href={blog.url}>{blog.url}</a>
-
-      <div>{blog.likes} likes <button onClick={() => handleIncrementLikesByOne(blog)}>like</button></div>
-
-      added by {blog.user.name}
-
-      <h4>comments</h4>
-
-      <form onSubmit={addNewComment}>
-        <input
-          value={newComment}
-          onChange={({ target }) => setNewComment(target.value)}
-        />
-        <button type="submit">add comment</button>
-      </form>
-
-
-
-      <ul>
-        {comments.map(comment => <li key={comment.id}>{comment.message}</li>)}
-      </ul>
-    </>
-  )
-}
 
 const App = () => {
   const dispatch = useDispatch()
@@ -178,6 +18,7 @@ const App = () => {
   const loggedOnUser = useSelector(state => state.signedInUser)
 
   console.log('rerender App component...')
+  console.log('App rerender : loggedOnUser redux store state is : ', loggedOnUser)
 
   const padding = {
     padding: 5
@@ -286,7 +127,7 @@ const App = () => {
           <Users />
         </Route>
         <Route path="/blogs/:id">
-          <BlogInfo blog={blog} handleIncrementLikesByOne={handleIncrementLikesByOne}/>
+          <Blog blog={blog} handleIncrementLikesByOne={handleIncrementLikesByOne}/>
         </Route>
         <Route path="/">
           <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
