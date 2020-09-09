@@ -26,7 +26,7 @@ export const removeNotification = () => {
 
 // make use of redux-thunk to implement front-end notification logic that DISPLAY notification and after X seconds REMOVE notification.
 let timer
-export const showNotificationWithTimeout = ({message, error, seconds}) => {
+export const showNotificationWithTimeout = ({message, error, seconds = 10}) => {
     return (dispatch) => {
         clearTimeout(timer)
 

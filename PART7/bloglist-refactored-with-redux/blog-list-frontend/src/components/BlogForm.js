@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+import { TextField, Button, DialogActions, DialogTitle, DialogContent, DialogContentText  } from '@material-ui/core'
 
-const BlogForm = ({ handleCreateNewBlog }) => {
+const BlogForm = ({ handleCreateNewBlog, handleClickClose }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -22,39 +23,46 @@ const BlogForm = ({ handleCreateNewBlog }) => {
   }
 
   return (
-    <div>
-      <h2>create new</h2>
-      <form onSubmit={addNewBlog}>
-        <div>
-          title:
-          <input
-            id="Title"
+    <>
+      <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+      <DialogContent>
+        <DialogContentText color='colorPrimary'>
+          To share your story with other uses, please type in Title, Author, and Url fields and click Submit!
+        </DialogContentText>
+        <form onSubmit={addNewBlog}>
+          <TextField
+            label="Title"
+            margin="dense"
+            fullWidth
+            autoFocus
             type="text"
             value={title}
             onChange={({ target }) => setTitle(target.value)}
           />
-        </div>
-        <div>
-          author:
-          <input
-            id="Author"
+          <TextField
+            label="Author"
+            margin="dense"
+            fullWidth
             type="text"
             value={author}
             onChange={({ target }) => setAuthor(target.value)}
           />
-        </div>
-        <div>
-          url:
-          <input
-            id="Url"
+          <TextField
+            label="Url"
+            margin="dense"
+            fullWidth
             type="text"
             value={url}
             onChange={({ target }) => setUrl(target.value)}
           />
-        </div>
-        <button id="submitBlog" type="submit">create</button>
-      </form>
-    </div>
+          <DialogActions>
+            <Button color="secondary" onClick={handleClickClose}>Cancel</Button>
+            <Button type="submit" color="primary" disabled={!title || !author || !url}>Submit</Button>
+          </DialogActions>
+        </form>
+      </DialogContent>
+      
+    </>
   )
 }
 

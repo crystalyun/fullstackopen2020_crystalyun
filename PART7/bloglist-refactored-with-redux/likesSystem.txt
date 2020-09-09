@@ -1,0 +1,18 @@
+source : https://stackoverflow.com/questions/28006521/how-to-model-a-likes-voting-system-with-mongodb?fbclid=IwAR2U5vlF2OBVvb2mLMzHoQyixFd91_DRuFWcF66o-CZwWWTUXxRGbGdyATo
+
+/*
+
+Solution for likes : 
+
+1. Have `Likes` data denormalized inside `Blog` Model as embedded array, which contains list of userIds.
+
+2. Because likesCount and `Likes` should be in sync, putting both data inside Blog model ensures atomicity when it comes to updating 2 fields at the same time when a user likes/unlikes a blog.
+
+3. If likesCount and Likes data were in different Models, say likesCount in Blog Model and Likes in a separate Likes Model, and have Blog Model reference Likes Model against its blogId, then I would have to use `transaction` to ensure cross-document/model atomicity for 
+like/unlike updates. 
+
+4. So, by putting the two data in same place handles update atomicity nicely without extra effort to implement `transaction`. 
+
+5. There is a downside however, in that as Likes embedded array grows for a blog post, performance issue will arise more than referencing a separate Likes model. My research says it can handle 500+ easily though.
+
+*/

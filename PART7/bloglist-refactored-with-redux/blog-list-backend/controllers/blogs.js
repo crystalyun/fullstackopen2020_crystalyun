@@ -1,39 +1,43 @@
 const commentsRouter = require('./comments')
+const { likesRouter, unlikesRouter } = require('./likes')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
-const User = require('../models/user')
-const jwt = require('jsonwebtoken')
+const { authenticateJWT } = require('../utils/middleware')
+const { isArray } = require('lodash')
 
 // base binding will be /api/blogs
 
-blogsRouter.get('/', async (request, response) => {
+blogsRouter.get('/', authenticateJWT, async (request, response) => {
+  const { user } = request
+
   const blogs = await Blog
-    .find({})
-    .populate('user', { blogs: 0 })
-    .populate('comments', { blog: 0 })
-  response.json(blogs.map(blog => blog.toJSON()))
-  //response.json serializes `blogs`, an arry of objects (WHICH IS, IN JAVASCRIPT, AN OBJECT), to JSON. calls JSON.stringify under the hood.
-  // JSON.stringify then calls .toJSON attached to Blog model which will remove ._id and .__v fields
-  // response.json(blogs) still works just fine
+    .find({},{ 
+      likes: { '$elemMatch': { '$eq': user._id } },
+      title: 1,
+      author: 1,
+      url: 1,
+      likesCount: 1
+    })
+    .populate('user', { blogs: 0, comments: 0 })
+    .populate({
+      path: 'comments',
+      select: { blog: 0 },
+      populate: {
+        path: 'user',
+        model: 'User',
+        select: { blogs: 0, comments: 0 }
+      },
+    })
+  
+  // mongoose query results are frozen objects so immutable. Convert to regular JSON object from immutable mongoose document object to manipulate the query result. (in this case, to add new prop didUserLike and remove likes property.) 
+  const blogToJSON = blogs.map(blog => blog.toJSON())
+  const result = blogToJSON.map(b => b.likes.length ===1 ? { ...b, didUserLike: true, likes: undefined } : { ...b, didUserLike: false, likes: undefined })
+  
+  response.json(result)
 })
 
-blogsRouter.post('/', async (request, response) => {
-  // adding new blogs is only possible if a valid token is sent with the HTTP POST request
-  console.log('request.token added from tokenExtractor middleware', request.token)
-
-  if (!request.token) {
-    return response.status(401).json({ error: 'token missing' })
-  }
-
-  // if decodedToken is verified, format will be {username, id, iat}
-  // verify and read
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-
-  const user = await User.findById(decodedToken.id)
+blogsRouter.post('/', authenticateJWT, async (request, response) => {
+  const { user } = request
 
   // the user identified by the token is designated as the creator of the blog
   const blog = new Blog({
@@ -52,62 +56,63 @@ blogsRouter.post('/', async (request, response) => {
   // response.status(201).json(blogCreated) will also just work
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
-  console.log('request.token added from tokenExtractor middleware', request.token)
-
-  if (!request.token) {
-    return response.status(401).json({ error: 'token missing' })
-  }
-
-  // if decodedToken is verified, format will be {username, id, iat}
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
+blogsRouter.delete('/:id', authenticateJWT, async (request, response) => {
+  const { user } = request
 
   const blog = await Blog.findById(request.params.id)
-  const user = await User.findById(decodedToken.id)
 
   if (blog.user.toString() !== user.id.toString()) {
     return response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog' })
   }
 
   await blog.remove()
+
   // remember to also update `User` model's `blogs` field
-  user.blogs = user.blogs.filter(b => b.id.toString() !== request.params.id.toString())
+  user.blogs = user.blogs.filter(b => b.toString() !== request.params.id.toString())
   await user.save()
 
   response.status(204).end()
 })
 
-blogsRouter.put('/:id', async (request, response) => {
-  if (!request.token) {
-    return response.status(401).json({ error: 'token missing' })
-  }
+blogsRouter.put('/:id', authenticateJWT, async (request, response) => {
+  const { user } = request
 
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
+  const blog = await Blog.findById(request.params.id)
   
-  const body = request.body
-
-  const blog = {
-    likes: body.likes
+  if (!blog) {
+    return response.status(400).json({ error: 'A blog cannot be found in database.' })
   }
 
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-
-  if (updatedBlog) {
-    response.json(updatedBlog.toJSON())
-  } else {
-    response.status(404).end()
+  if (blog.user.toString() !== user.id.toString()) {
+    return response.status(401).json({ error: 'A blog can be updated only by the user who added the blog' })
   }
+
+  const { title, author, url } = request.body
+
+  const blogObj = Object.assign({}, 
+                    title? { title } : null,
+                    author? { author } : null,
+                    url? { url } :null,
+                  )
+
+  console.log('blogObj print out ', blogObj)
+
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blogObj, { new: true })
+
+  if (!updatedBlog) {
+    return response.status(400).json({ error: 'A blog cannot be found in database.' })
+  }
+
+  response.json(updatedBlog.toJSON())
 })
+
+
 
 // nest `commentsRouter` router by attaching it to `blogsRouter` router as middleware.
 blogsRouter.use('/:blogId/comments', commentsRouter)
+
+// nest `likesRouter` router by attaching it to `blogsRouter` router as middleware.
+blogsRouter.use('/:blogId/like', likesRouter)
+blogsRouter.use('/:blogId/unlike', unlikesRouter)
 
 module.exports = blogsRouter

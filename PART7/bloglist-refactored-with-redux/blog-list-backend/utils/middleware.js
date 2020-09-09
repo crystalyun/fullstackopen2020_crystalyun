@@ -1,4 +1,6 @@
 const logger = require('./logger')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 const errorHandler = (error, request, response, next) => {
   logger.info('error is now being handled in middleware error handler')
@@ -28,7 +30,35 @@ const tokenExtractor = (request, response, next) => {
   next()
 }
 
+const authenticateJWT = async (request, response, next) => {
+  // valid token is attached to request object from tokenExtractor middleware.
+  console.log('request.token added from tokenExtractor middleware', request.token)
+
+  if (!request.token) {
+    return response.status(401).json({ error: 'token missing' })
+  }
+
+  // if decodedToken is verified, format will be {username, id, iat}
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  console.log(decodedToken)
+
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+
+  // Once verified the token with JWT, attach the `user` object into the request and continue.
+  const user = await User.findById(decodedToken.id)
+
+  // user is null when decodedToken is valid {username, id, iat} with valid SECRET, but when a user does not exist in db.
+  if (!user) {
+    return response.status(401).json({ error: 'user identified from jwt does not exist in database.' })
+  }
+
+  request.user = user
+  next()
+}
+
 
 module.exports = {
-  errorHandler, tokenExtractor
+  errorHandler, tokenExtractor, authenticateJWT
 }

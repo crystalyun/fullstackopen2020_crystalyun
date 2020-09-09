@@ -1,75 +1,61 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
-import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import Users from './components/Users'
-import Blog from './components/Blog'
+import BlogCard from './components/BlogCard'
+import BlogModal from './components/BlogModal'
 import { useSelector, useDispatch } from 'react-redux'
-import { addBlog, addVote, initializeBlogs } from './reducers/blogReducer'
-import { showNotificationWithTimeout } from './reducers/notificationReducer'
+import { addBlog, initializeBlogs } from './reducers/blogReducer'
 import { logInUser, logOutUser, loadUser } from './reducers/signInUserReducer'
-import { Link, Switch, Route, useRouteMatch } from 'react-router-dom'
+import { Link as RouterLink, Switch, Route, useRouteMatch, Redirect } from 'react-router-dom'
+import { makeStyles, Button, AppBar, Container, Toolbar, Typography, Link, Grid, CssBaseline, Dialog } from '@material-ui/core'
+
+const useStyles = makeStyles((theme) => ({
+  appBar: {
+    backgroundColor: '#FFFFFF',
+  },
+  link: {
+    margin: theme.spacing(1, 1),
+  },
+  cardText: {
+    color: '#FFFFFF'
+  },
+  heroContent: {
+    padding: '32px 16px 80px 24px',
+    marginTop: '8px',
+    marginBottom: '8px',
+  },
+}))
 
 const App = () => {
   const dispatch = useDispatch()
   const blogs = useSelector(state => state.blogs)
   const notification = useSelector(state => state.notification)
   const loggedOnUser = useSelector(state => state.signedInUser)
+  const [formOpen, setFormOpen] = useState(false)
+  const [blogModalOpen, setBlogModalOpen] = useState(true)
+  const classes = useStyles()
 
   console.log('rerender App component...')
-  console.log('App rerender : loggedOnUser redux store state is : ', loggedOnUser)
-
-  const padding = {
-    padding: 5
-  }
-
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 5,
-    border: 'solid',
-    marginBottom: 5,
-    borderWidth: 1
-  }
-
-  const navBarStyle = {
-    backgroundColor: 'grey'
-  }
 
   const match = useRouteMatch('/blogs/:id')
   const blog = match
     ? blogs.find(b => b.id === match.params.id)
     : null
 
-   // references to components with ref
-   const BlogFormRef = useRef()
-
   useEffect(() => {
-    dispatch(initializeBlogs())
-  }, [dispatch])
+    if (loggedOnUser) {
+      dispatch(initializeBlogs())
+    }
+  }, [dispatch, loggedOnUser])
 
   useEffect(() => {
     dispatch(loadUser())
   }, [dispatch])
 
   const handleLogin = ({ username, password }) => {
-    try {
-      dispatch(logInUser(username, password))
-        .then(user => {
-          dispatch(showNotificationWithTimeout({
-            message: `${user.name} welcome back!`,
-            error: false,
-            seconds: 10
-          }))
-        })
-    } catch (exception) {
-      // alert user of unsuccessful login
-      dispatch(showNotificationWithTimeout({
-        message: exception.response.data.error,
-        error: true,
-        seconds: 10
-      }))
-    }
+    dispatch(logInUser(username, password))
   }
 
   const handleLogout = () => {
@@ -77,32 +63,45 @@ const App = () => {
   }
 
   const handleCreateNewBlog = async (blogObject) => {
-    try {
-      dispatch(addBlog(blogObject))
-
-      dispatch(showNotificationWithTimeout({
-        message: `a new blog ${blogObject.title} by ${blogObject.author} added`,
-        error: false,
-        seconds: 10
-      }))
-      // Close `create new blog` form by changing the component `Togglable` `visible` state to false
-      BlogFormRef.current.toggleVisibility()
-    } catch(exception) {
-      console.log(exception)
-    }
+    handleClickClose()
+    dispatch(addBlog(blogObject))
   }
 
-  const handleIncrementLikesByOne = (blog) => {
-    dispatch(addVote(blog))
+  const handleClickOpen = () => {
+    setFormOpen(true)
+  }
+
+  const handleClickClose = () => {
+    setFormOpen(false)
+  }
+
+  const handleClickOpenBlogModal = () => {
+    setBlogModalOpen(true)
+  }
+
+  const handleClickCloseBlogModal = () => {
+    setBlogModalOpen(false)
   }
 
   if (!loggedOnUser) {
     return (
       <>
-        <Notification notification={notification}/>
-        <LoginForm
-          handleLogin={handleLogin}
-        />
+        <AppBar className={classes.appBar}>
+          <Container>
+            <Toolbar>
+              <Typography variant="h6" style={{ margin: '0px 25px 0px 0px' }}>
+                Blog
+              </Typography>
+            </Toolbar>
+          </Container>
+        </AppBar>
+
+        <Toolbar />
+
+        <Notification notification={notification} />
+
+        <LoginForm handleLogin={handleLogin} />
+        
       </>
     )
   }
@@ -111,36 +110,74 @@ const App = () => {
 
   return (
     <>
-      <div style={navBarStyle}>
-        <Link style={padding} to="/">home</Link>
-        <Link style={padding} to="/users">users</Link>
-        <span>{loggedOnUser.name} logged in </span>
-        <button onClick={handleLogout}>logout</button>
-      </div>
+      <CssBaseline />
 
-      <h2>blogs</h2>
+      <AppBar position="fixed" className={classes.appBar}>
+        <Container maxWidth="lg">
+          <Toolbar>
+            <Typography variant="h6" style={{ margin: '0px 25px 0px 0px' }}>
+              Blog
+            </Typography>
+            <Link to='/' component={RouterLink} className={classes.link}>HOME</Link>
+            <Link to='/users' component={RouterLink} className={classes.link} style={{ flex: '1' }}>USERS</Link>
+            <Typography variant="body2" style={{ color: '#442C2E', marginRight: '5px'}}><b>{loggedOnUser.name}</b> logged in</Typography>
+            <Button color="primary" variant="contained" onClick={handleLogout}>Log out</Button>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
-      <Notification notification={notification} />
+      <Toolbar />
 
+      <Container maxWidth="lg">
+        <Notification notification={notification} />
+      </Container>
+      
       <Switch>
         <Route path="/users">
-          <Users />
+            <Users />
         </Route>
         <Route path="/blogs/:id">
-          <Blog blog={blog} handleIncrementLikesByOne={handleIncrementLikesByOne}/>
+          {/* { 
+            (!blogModalOpen) && <Redirect to="/" />
+          } */}
+          <Dialog open={blogModalOpen} onClose={handleClickCloseBlogModal} scroll='body' maxWidth='sm' fullWidth={true}>
+            <BlogModal
+              blog={blog}
+            />
+          </Dialog>
         </Route>
         <Route path="/">
-          <Togglable buttonLabel="create new blog" ref={BlogFormRef}>
-            <BlogForm
-              handleCreateNewBlog={handleCreateNewBlog}
-            />
-          </Togglable>
 
-          {blogs.sort(byLikes).map(blog =>
-            <div style={blogStyle} key={blog.id}>
-              <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
-            </div>
-          )}
+          {/* Hero unit */}
+          <Container maxWidth="lg">
+          <Grid container id="hero" className={classes.heroContent}>
+            <Grid item xs={12} sm={5}>
+              <Typography variant="h3" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
+                Tell us your story
+              </Typography>
+              <Typography variant="body1" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
+                Tell us your unique and interesting stories. Rainy days in Paris with Baguette and Cigaratte... Or it could be a EDM filled club days in NYC...
+              </Typography>
+              <Button color="primary" variant="contained" fullWidth onClick={handleClickOpen} style={{ marginTop: '20px'}}>Share</Button>
+
+              <Dialog open={formOpen} aria-labelledby="form-dialog-title">
+                <BlogForm handleCreateNewBlog={handleCreateNewBlog} handleClickClose={handleClickClose}/>
+              </Dialog>
+            </Grid>
+          </Grid>
+          </Container>
+          {/* Hero ends */}
+
+          <Container maxWidth="lg">
+            <Grid container spacing={4}>
+              {blogs.sort(byLikes).map(blog => 
+                <BlogCard 
+                  key={blog.id}
+                  blog={blog}
+                  handleClickOpenBlogModal={handleClickOpenBlogModal}
+                />)}
+            </Grid>
+          </Container>
 
         </Route>
       </Switch>
@@ -149,3 +186,4 @@ const App = () => {
 }
 
 export default App
+

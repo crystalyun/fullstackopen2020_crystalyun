@@ -1,3 +1,7 @@
+body {
+    font-family: 'Nunito';
+}
+
 .notification {
     background: lightgrey;
     font-size: 20px;
@@ -13,4 +17,22 @@
   
 .error {
     color: red;
-}  
+}
+
+#hero {
+    position: relative;
+    background-image: url('https://source.unsplash.com/random/1280x400');
+    background-size: cover;
+    border-radius: 15px;
+}
+
+#hero::before {
+    content: '';
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    background-color: rgba(0,0,0,0.4);
+    border-radius: 15px;
+}

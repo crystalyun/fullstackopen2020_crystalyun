@@ -1,32 +1,36 @@
 import axios from 'axios'
-import storage from '../utils/storage'
+import helper from '../utils/helper'
 
 const baseUrl = '/api/blogs'
 
-const getConfig = () => {
-  return {
-    headers: { Authorization: `bearer ${storage.loadUser().token}` }
-  }
-}
-
 const getAll = () => {
-  const request = axios.get(baseUrl)
+  const request = axios.get(baseUrl, helper.getAuthHeader())
   return request.then(response => response.data)
 }
 
 const create = async blog => {
-  const response = await axios.post(baseUrl, blog, getConfig())
+  const response = await axios.post(baseUrl, blog, helper.getAuthHeader())
   return response.data
 }
 
 const update = async (id, blog) => {
-  const response = await axios.put(`${baseUrl}/${id}`, blog, getConfig())
+  const response = await axios.put(`${baseUrl}/${id}`, blog, helper.getAuthHeader())
   return response.data
 }
 
 const deleteBlog = async (id) => {
-  const response = await axios.delete(`${baseUrl}/${id}`, getConfig())
+  const response = await axios.delete(`${baseUrl}/${id}`, helper.getAuthHeader())
   return response.data
 }
 
-export default { getAll, create, update, deleteBlog }
+const likeBlog = async (id) => {
+  const response = await axios.post(`${baseUrl}/${id}/like`, null, helper.getAuthHeader())
+  return response.data
+}
+
+const unlikeBlog = async (id) => {
+  const response = await axios.post(`${baseUrl}/${id}/unlike`, null, helper.getAuthHeader())
+  return response.data
+}
+
+export default { getAll, create, update, deleteBlog, likeBlog, unlikeBlog }

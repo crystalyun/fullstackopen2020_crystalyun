@@ -5,11 +5,15 @@ import App from './App'
 import './index.css'
 import { BrowserRouter as Router } from 'react-router-dom'
 import store from './store'
+import theme from './theme'
+import { ThemeProvider } from '@material-ui/core'
 
 ReactDOM.render(
   <Provider store={store}>
       <Router>
-        <App />
+        <ThemeProvider theme={theme}>
+          <App />
+        </ThemeProvider>
       </Router>
   </Provider>,
   document.getElementById('root')

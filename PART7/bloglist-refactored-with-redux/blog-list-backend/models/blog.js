@@ -1,16 +1,18 @@
 const mongoose = require('mongoose')
 
+// `Blog` Model's `comments` are a referenced model (`Comments`)
+// whereas `likes` is an embedded array. (in Mongoose terms, `subdocuments`.)
 const blogSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   author: String,
   url: {
     type: String,
     required: true
   },
-  likes: {
+  likesCount: {
     type: Number,
     default: 0
   },
@@ -23,7 +25,12 @@ const blogSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Comment'
     }
-  ]
+  ],
+  likes : [
+    {
+      type: mongoose.Schema.Types.ObjectId
+    }
+  ],
 })
 
 // called when JSON.stringify() (=response.json()) is called
