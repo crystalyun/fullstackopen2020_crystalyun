@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { makeStyles, Button, Typography, Link, Grid, Card, CardContent, CardActionArea, CardActions, CardMedia, IconButton } from '@material-ui/core'
 import FavoriteIcon from '@material-ui/icons/Favorite'
@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 const BlogCard = ({ blog, handleClickOpenBlogModal }) => {
     const classes = useStyles()
     const dispatch = useDispatch()
+    let location = useLocation()
 
     const handleClickLikeButton = (blog) => {
       if (blog.didUserLike) {
@@ -59,7 +60,7 @@ const BlogCard = ({ blog, handleClickOpenBlogModal }) => {
     return (
       <Grid item xs={12} sm={6} md={3} align="center">
         <Card className={classes.card}>
-          <CardActionArea className={classes.actionArea} component={RouterLink} to={`/blogs/${blog.id}`} onClick={handleClickOpenBlogModal}>
+          <CardActionArea className={classes.actionArea} component={RouterLink} to={{ pathname: `/blogs/${blog.id}`, state: { modal: location } }} onClick={handleClickOpenBlogModal}>
             <CardMedia
               className={classes.cardMedia}
               image={randomImageUrl}
@@ -75,7 +76,7 @@ const BlogCard = ({ blog, handleClickOpenBlogModal }) => {
           </CardActionArea>
           <CardActions disableSpacing className={classes.cardActions}>
             <Button size="small" onClick={handleClickOpenBlogModal}>
-              <Link to={`/blogs/${blog.id}`} component={RouterLink}>See More</Link>
+              <Link to={{ pathname: `/blogs/${blog.id}`, state: { modal: location } }} component={RouterLink}>See More</Link>
             </Button>
             <IconButton className={blog.didUserLike ? classes.liked : classes.unliked} onClick={() => handleClickLikeButton(blog)} aria-label="add to favorites">
               <FavoriteIcon  />

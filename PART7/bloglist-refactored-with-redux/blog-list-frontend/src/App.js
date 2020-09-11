@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import LoginForm from './components/LoginForm'
-import BlogForm from './components/BlogForm'
+import Home from './components/Home'
 import Notification from './components/Notification'
 import Users from './components/Users'
-import BlogCard from './components/BlogCard'
 import BlogModal from './components/BlogModal'
+import Login from './components/Login'
 import { useSelector, useDispatch } from 'react-redux'
-import { addBlog, initializeBlogs } from './reducers/blogReducer'
-import { logInUser, logOutUser, loadUser } from './reducers/signInUserReducer'
-import { Link as RouterLink, Switch, Route, useRouteMatch, Redirect } from 'react-router-dom'
-import { makeStyles, Button, AppBar, Container, Toolbar, Typography, Link, Grid, CssBaseline, Dialog } from '@material-ui/core'
+import { initializeBlogs } from './reducers/blogReducer'
+import { logOutUser, loadUser } from './reducers/signInUserReducer'
+import { Link as RouterLink, Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom'
+import { makeStyles, Button, AppBar, Container, Toolbar, Typography, Link, CssBaseline, Dialog } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -18,14 +17,6 @@ const useStyles = makeStyles((theme) => ({
   link: {
     margin: theme.spacing(1, 1),
   },
-  cardText: {
-    color: '#FFFFFF'
-  },
-  heroContent: {
-    padding: '32px 16px 80px 24px',
-    marginTop: '8px',
-    marginBottom: '8px',
-  },
 }))
 
 const App = () => {
@@ -33,9 +24,11 @@ const App = () => {
   const blogs = useSelector(state => state.blogs)
   const notification = useSelector(state => state.notification)
   const loggedOnUser = useSelector(state => state.signedInUser)
-  const [formOpen, setFormOpen] = useState(false)
   const [blogModalOpen, setBlogModalOpen] = useState(true)
   const classes = useStyles()
+  let location = useLocation()
+
+  let modal = location.state && location.state.modal
 
   console.log('rerender App component...')
 
@@ -54,25 +47,8 @@ const App = () => {
     dispatch(loadUser())
   }, [dispatch])
 
-  const handleLogin = ({ username, password }) => {
-    dispatch(logInUser(username, password))
-  }
-
   const handleLogout = () => {
     dispatch(logOutUser())
-  }
-
-  const handleCreateNewBlog = async (blogObject) => {
-    handleClickClose()
-    dispatch(addBlog(blogObject))
-  }
-
-  const handleClickOpen = () => {
-    setFormOpen(true)
-  }
-
-  const handleClickClose = () => {
-    setFormOpen(false)
   }
 
   const handleClickOpenBlogModal = () => {
@@ -83,30 +59,15 @@ const App = () => {
     setBlogModalOpen(false)
   }
 
+
   if (!loggedOnUser) {
     return (
       <>
-        <AppBar className={classes.appBar}>
-          <Container>
-            <Toolbar>
-              <Typography variant="h6" style={{ margin: '0px 25px 0px 0px' }}>
-                Blog
-              </Typography>
-            </Toolbar>
-          </Container>
-        </AppBar>
-
-        <Toolbar />
-
-        <Notification notification={notification} />
-
-        <LoginForm handleLogin={handleLogin} />
-        
+        <Redirect to="/login" />
       </>
     )
   }
 
-  const byLikes = (b1, b2) => b2.likes - b1.likes
 
   return (
     <>
@@ -132,58 +93,20 @@ const App = () => {
         <Notification notification={notification} />
       </Container>
       
-      <Switch>
-        <Route path="/users">
-            <Users />
-        </Route>
-        <Route path="/blogs/:id">
-          {/* { 
-            (!blogModalOpen) && <Redirect to="/" />
-          } */}
-          <Dialog open={blogModalOpen} onClose={handleClickCloseBlogModal} scroll='body' maxWidth='sm' fullWidth={true}>
-            <BlogModal
-              blog={blog}
-            />
-          </Dialog>
-        </Route>
-        <Route path="/">
-
-          {/* Hero unit */}
-          <Container maxWidth="lg">
-          <Grid container id="hero" className={classes.heroContent}>
-            <Grid item xs={12} sm={5}>
-              <Typography variant="h3" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
-                Tell us your story
-              </Typography>
-              <Typography variant="body1" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
-                Tell us your unique and interesting stories. Rainy days in Paris with Baguette and Cigaratte... Or it could be a EDM filled club days in NYC...
-              </Typography>
-              <Button color="primary" variant="contained" fullWidth onClick={handleClickOpen} style={{ marginTop: '20px'}}>Share</Button>
-
-              <Dialog open={formOpen} aria-labelledby="form-dialog-title">
-                <BlogForm handleCreateNewBlog={handleCreateNewBlog} handleClickClose={handleClickClose}/>
-              </Dialog>
-            </Grid>
-          </Grid>
-          </Container>
-          {/* Hero ends */}
-
-          <Container maxWidth="lg">
-            <Grid container spacing={4}>
-              {blogs.sort(byLikes).map(blog => 
-                <BlogCard 
-                  key={blog.id}
-                  blog={blog}
-                  handleClickOpenBlogModal={handleClickOpenBlogModal}
-                />)}
-            </Grid>
-          </Container>
-
-        </Route>
+      <Switch location={modal || location}>
+        <Route exact path="/" children={<Home blogs={blogs} handleClickOpenBlogModal={handleClickOpenBlogModal}/>} />
+        <Route path="/login" children={<Login />} />
+        <Route path="/users" children={<Users />} />
+        <Route path="/blogs/:id" children={<Container maxWidth="md" style={{ marginTop: '16px' }}><BlogModal blog={blog} /></Container>} />
       </Switch>
+
+      {/* Show the modal when a modal is set */}
+      {modal && <Route path="/blogs/:id" children={<Dialog open={blogModalOpen} onClose={handleClickCloseBlogModal} scroll='body' maxWidth='sm' fullWidth={true}><BlogModal blog={blog} /></Dialog>} />}
+
     </>
   )
 }
 
 export default App
+
 

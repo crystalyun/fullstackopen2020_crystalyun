@@ -1,0 +1,5 @@
+modal routing
+source : https://codedaily.io/tutorials/47/Create-a-Modal-Route-with-Link-and-Nav-State-in-React-Router
+source v2 : https://reactrouter.com/web/example/modal-gallery
+source v3 : https://reactrouter.com/web/api/location
+source v4: https://ui.dev/react-router-v4-pass-props-to-link/
