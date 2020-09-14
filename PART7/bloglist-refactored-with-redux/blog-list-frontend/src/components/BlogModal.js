@@ -1,12 +1,13 @@
 import React, { useRef } from 'react'
-import { Grid, makeStyles, CssBaseline, Paper, Avatar, Typography, Divider, IconButton, Link } from '@material-ui/core'
+import NavBar from './NavBar'
+import { Grid, makeStyles, CssBaseline, Paper, Avatar, Typography, Divider, IconButton, Link, Container, Dialog } from '@material-ui/core'
 import FavoriteIcon from '@material-ui/icons/Favorite'
 import ModeCommentIcon from '@material-ui/icons/ModeComment';
 import CommentView from './CommentView'
 import CommentForm from './CommentForm'
 import helper from '../utils/helper'
 import { likeBlog, unlikeBlog } from '../reducers/blogReducer'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) => ({
   image: {
@@ -121,12 +122,7 @@ const BlogModal = ({ blog }) => {
           {blog.comments.map(comment => 
             <CommentView key={comment.id} comment={comment}/>
           )}
-
-
-          
-
         
-
         </Grid>
         <Divider light/>
         
@@ -151,5 +147,28 @@ const BlogModal = ({ blog }) => {
   )
 }
 
-export default BlogModal
+export const BlogModalFullPageView = ({blog}) => {
+  const loggedOnUser = useSelector(state => state.signedInUser)
+
+  return (
+    <>
+      <NavBar userName={loggedOnUser.name} />
+
+      <Container maxWidth="md" style={{ marginTop: '16px' }}>
+        <BlogModal blog={blog} />
+      </Container>
+    </>
+
+  )
+}
+
+export const BlogModalPopUpView = ({blog, blogModalOpen, handleClickCloseBlogModal}) => {
+  return (
+    <Dialog open={blogModalOpen} onClose={handleClickCloseBlogModal} scroll='body' maxWidth='sm' fullWidth={true}>
+      <BlogModal blog={blog} />
+    </Dialog>
+  )
+}
+
+
 

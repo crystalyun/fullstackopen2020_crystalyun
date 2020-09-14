@@ -1,4 +1,6 @@
 import React, { useState, useEffect, forwardRef } from 'react'
+import NavBar from './NavBar'
+import { useSelector } from 'react-redux'
 import { Link as RouterLink, Switch, Route, useRouteMatch } from 'react-router-dom'
 import userService from '../services/users'
 import MaterialTable from 'material-table'
@@ -51,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
 const Users = () => {
   const [users, setUsers] = useState([])
   const classes = useStyles()
+  const loggedOnUser = useSelector(state => state.signedInUser)
 
   useEffect(() => {
     userService
@@ -74,6 +77,9 @@ const Users = () => {
 
   return (
     <>
+
+      <NavBar userName={loggedOnUser.name}/>
+
       <Switch>
         <Route path='/users/:id'>
           <User user={user} />

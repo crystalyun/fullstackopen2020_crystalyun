@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import NavBar from './NavBar'
 import BlogForm from './BlogForm'
 import BlogCard from './BlogCard'
 import { addBlog } from '../reducers/blogReducer'
@@ -20,6 +21,7 @@ const Home = ({ blogs, handleClickOpenBlogModal }) => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const [formOpen, setFormOpen] = useState(false)
+  const loggedOnUser = useSelector(state => state.signedInUser)
 
   const handleCreateNewBlog = async (blogObject) => {
     handleClickClose()
@@ -38,6 +40,8 @@ const Home = ({ blogs, handleClickOpenBlogModal }) => {
 
   return (
     <>
+      <NavBar userName={loggedOnUser.name} />
+
       {/* Hero unit */}
       <Container maxWidth="lg">
       <Grid container id="hero" className={classes.heroContent}>

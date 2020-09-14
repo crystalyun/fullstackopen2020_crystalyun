@@ -1,0 +1,7 @@
+source1 : https://ui.dev/react-router-v4-protected-routes-authentication/
+
+https://medium.com/octopus-wealth/authenticated-routing-with-react-react-router-redux-typescript-677ed49d4bd6
+
+https://medium.com/@jrcreencia/persisting-redux-state-to-local-storage-f81eb0b90e7e
+https://stackoverflow.com/questions/59014500/privateroute-hoc-in-react-router-still-redirecting-to-login-after-authenticated
+https://v1.prisma.io/forum/t/react-hoc-to-check-for-authorized-user-protected-routes/478/13

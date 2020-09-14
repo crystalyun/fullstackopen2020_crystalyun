@@ -1,0 +1,39 @@
+{
+  "name": "backend",
+  "version": "0.0.1",
+  "description": "zzdd",
+  "main": "index.js",
+  "scripts": {
+    "build:ui": "rm -rf build && cd ../fullstack/notes_frontend && npm run build --prod && cp -r build ../../notes_backend/",
+    "deploy": "git push heroku master",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
+    "logs:prod": "heroku logs --tail",
+    "start": "cross-env NODE_ENV=production node index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "lint": "eslint .",
+    "start:test": "cross-env NODE_ENV=test node index.js"
+  },
+  "author": "Crystal Yun",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.2",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.20",
+    "mongoose-unique-validator": "^2.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.3.1",
+    "jest": "^26.1.0",
+    "nodemon": "^2.0.4",
+    "supertest": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
