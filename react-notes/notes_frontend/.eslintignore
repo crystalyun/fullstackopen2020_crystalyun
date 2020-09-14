@@ -1,0 +1,5 @@
+node_modules
+build
+coverage
+cypress/integration/examples
+cypress/plugins
