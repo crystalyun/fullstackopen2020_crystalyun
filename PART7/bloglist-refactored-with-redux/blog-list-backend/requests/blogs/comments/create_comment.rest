@@ -1,6 +1,6 @@
-POST http://localhost:3003/api/blogs/5f52655caa42eb3a4c006b1c/comments
+POST http://localhost:3003/api/blogs/5f78d783f9a8683c1c9c4f0b/comments
 Content-Type: application/json
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJyaXRuZXkiLCJpZCI6IjVmNDcwNzlkYTVkMmQ0MGRhY2NjZmU4NiIsImlhdCI6MTU5ODc5ODYxN30.ux7FmKqHtvTsCVxqU9pZz5ddGJ2vQHmbJOachEfAv3M
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhlbGxhcyIsImlkIjoiNWY0NzA3YjNhNWQyZDQwZGFjY2NmZTg3IiwiaWF0IjoxNjAxMjk5Nzc4fQ.G4do6gn95DP0hMv3yQ8x4-mQpjDEYxXjpwkGPWPTEDs
 
 {
     "message": "i am an OP!"

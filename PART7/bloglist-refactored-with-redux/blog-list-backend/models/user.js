@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
   },
   name: String,
   passwordHash: String,
+  role: {
+    type: String,
+    default: 'USER'
+  },
   blogs: [
     {
       type: mongoose.Schema.Types.ObjectId,

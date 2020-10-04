@@ -2,13 +2,18 @@ const commentsRouter = require('./comments')
 const { likesRouter, unlikesRouter } = require('./likes')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
-const { authenticateJWT } = require('../utils/middleware')
-const { isArray } = require('lodash')
+const { authenticateJWTandUserIfTokenExists, authUserRequired } = require('../utils/middleware')
+const { isAdminOrAuthorSelf } = require('../permissions')
 
 // base binding will be /api/blogs
 
-blogsRouter.get('/', authenticateJWT, async (request, response) => {
-  const { user } = request
+blogsRouter.get('/', authenticateJWTandUserIfTokenExists, async (request, response) => {
+  let { user } = request
+  console.log('user', user)
+
+  if (!user) {
+    user = 'GUEST'
+  }
 
   const blogs = await Blog
     .find({},{ 
@@ -31,12 +36,23 @@ blogsRouter.get('/', authenticateJWT, async (request, response) => {
   
   // mongoose query results are frozen objects so immutable. Convert to regular JSON object from immutable mongoose document object to manipulate the query result. (in this case, to add new prop didUserLike and remove likes property.) 
   const blogToJSON = blogs.map(blog => blog.toJSON())
-  const result = blogToJSON.map(b => b.likes.length ===1 ? { ...b, didUserLike: true, likes: undefined } : { ...b, didUserLike: false, likes: undefined })
+  const result = blogToJSON.map(b => {
+    if (user === 'GUEST') {
+      return { ...b, didUserLike: null, likes: undefined }
+    }
+
+    if (b.likes.length === 1) {
+      return { ...b, didUserLike: true, likes: undefined }
+    } else if (b.likes.length === 0) {
+      return { ...b, didUserLike: false, likes: undefined }
+    }
+  })
   
   response.json(result)
 })
 
-blogsRouter.post('/', authenticateJWT, async (request, response) => {
+
+blogsRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
   const { user } = request
 
   // the user identified by the token is designated as the creator of the blog
@@ -51,18 +67,21 @@ blogsRouter.post('/', authenticateJWT, async (request, response) => {
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
 
-  const blogCreated = await Blog.findById(savedBlog._id).populate('user', { blogs: 0 })
+  const blogCreated = await Blog.findById(savedBlog._id).populate('user', { blogs: 0, comments: 0 })
   response.status(201).json(blogCreated.toJSON())
-  // response.status(201).json(blogCreated) will also just work
 })
 
-blogsRouter.delete('/:id', authenticateJWT, async (request, response) => {
+blogsRouter.delete('/:id', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
   const { user } = request
 
   const blog = await Blog.findById(request.params.id)
 
-  if (blog.user.toString() !== user.id.toString()) {
-    return response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog' })
+  if (!blog) {
+    return response.status(400).json({ error: 'This blog looks like it is already deleted in database.' })
+  }
+
+  if (!isAdminOrAuthorSelf(user, blog)) {
+    return response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog or by ADMIN.' })
   }
 
   await blog.remove()
@@ -74,17 +93,17 @@ blogsRouter.delete('/:id', authenticateJWT, async (request, response) => {
   response.status(204).end()
 })
 
-blogsRouter.put('/:id', authenticateJWT, async (request, response) => {
+blogsRouter.put('/:id', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
   const { user } = request
 
   const blog = await Blog.findById(request.params.id)
   
   if (!blog) {
-    return response.status(400).json({ error: 'A blog cannot be found in database.' })
+    return response.status(400).json({ error: 'This blog is not found in database.' })
   }
 
-  if (blog.user.toString() !== user.id.toString()) {
-    return response.status(401).json({ error: 'A blog can be updated only by the user who added the blog' })
+  if (!isAdminOrAuthorSelf(user, blog)) {
+    return response.status(401).json({ error: 'A blog can be deleted only by the user who added the blog or by ADMIN.' })
   }
 
   const { title, author, url } = request.body
@@ -105,7 +124,6 @@ blogsRouter.put('/:id', authenticateJWT, async (request, response) => {
 
   response.json(updatedBlog.toJSON())
 })
-
 
 
 // nest `commentsRouter` router by attaching it to `blogsRouter` router as middleware.

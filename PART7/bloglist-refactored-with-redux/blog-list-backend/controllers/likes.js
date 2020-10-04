@@ -5,10 +5,10 @@ const unlikesRouter = require('express').Router({
   mergeParams: true
 })
 const Blog = require('../models/blog')
-const { authenticateJWT } = require('../utils/middleware')
+const { authenticateJWTandUserIfTokenExists, authUserRequired } = require('../utils/middleware')
 
 // base for likesRouter is `/api/blogs/:blogId/like`.
-likesRouter.post('/', authenticateJWT, async (request, response) => {
+likesRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
   const { user } = request
 
   const update = await Blog.findOneAndUpdate(
@@ -37,7 +37,7 @@ likesRouter.post('/', authenticateJWT, async (request, response) => {
 })
 
 // base for unlikesRouter is `/api/blogs/:blogId/unlike`.
-unlikesRouter.post('/', authenticateJWT, async (request, response) => {
+unlikesRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
   const { user } = request
 
   const update = await Blog.findOneAndUpdate(

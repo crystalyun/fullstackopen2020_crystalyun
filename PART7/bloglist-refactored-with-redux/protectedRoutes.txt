@@ -5,3 +5,10 @@ https://medium.com/octopus-wealth/authenticated-routing-with-react-react-router-
 https://medium.com/@jrcreencia/persisting-redux-state-to-local-storage-f81eb0b90e7e
 https://stackoverflow.com/questions/59014500/privateroute-hoc-in-react-router-still-redirecting-to-login-after-authenticated
 https://v1.prisma.io/forum/t/react-hoc-to-check-for-authorized-user-protected-routes/478/13
+
+hw: refactor my code with using such examples.. i think initializeBlogs & loadUser & isUserFoundInLocalStorage is a bit hacky..
+https://github.com/reduxjs/redux/issues/1676
+redux async example
+redux shopping cart example
+redux real world example
+redux more examples - first example on github 

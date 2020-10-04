@@ -2,7 +2,7 @@
 const commentsRouter = require('express').Router({ mergeParams: true })
 const Comment = require('../models/comment')
 const Blog = require('../models/blog')
-const { authenticateJWT } = require('../utils/middleware')
+const { authUserRequired, authenticateJWTandUserIfTokenExists } = require('../utils/middleware')
 
 /*
 refer to answer https://stackoverflow.com/questions/25260818/rest-with-express-js-nested-router
@@ -19,7 +19,7 @@ in this case,
 // then update Comment model with blogId ref.
 // AND also update Blog model by concatenating commentId to commentId ref array.
 // 'blogId' param comes from `blogsRouter.use('/:blogId/comments', commentsRouter)` in blog controller.
-commentsRouter.post('/', authenticateJWT, async (request, response) => {
+commentsRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
     const { user } = request
     const { message } = request.body
 
