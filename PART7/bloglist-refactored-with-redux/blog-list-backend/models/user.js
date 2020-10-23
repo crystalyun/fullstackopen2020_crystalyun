@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: String,
   role: {
     type: String,
+    enum: ['USER', 'ADMIN'],
     default: 'USER'
   },
   blogs: [

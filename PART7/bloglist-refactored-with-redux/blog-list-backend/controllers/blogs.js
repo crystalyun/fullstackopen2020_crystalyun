@@ -4,25 +4,54 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const { authenticateJWTandUserIfTokenExists, authUserRequired } = require('../utils/middleware')
 const { isAdminOrAuthorSelf } = require('../permissions')
-
+const querystring = require('querystring')
 // base binding will be /api/blogs
 
 blogsRouter.get('/', authenticateJWTandUserIfTokenExists, async (request, response) => {
-  let { user } = request
-  console.log('user', user)
+  const { user } = request
+  const limit = request.query.limit
+  const column = request.query.sort
+  const order = request.query.order
+  const comparison = (order === 'desc') ? "$lt" : "$gt"
 
-  if (!user) {
-    user = 'GUEST'
-  }
+  console.log('sort: ', column, 'order: ', order, 'limit : ', limit)
+  console.log('comparison: ', comparison)
 
-  const blogs = await Blog
-    .find({},{ 
+  let nextValue
+  let nextId
+  let cursor = {}
+
+  if (request.query.next) {
+    nextValue = request.query.next.split('_')[0]
+    nextId = request.query.next.split('_')[1]
+    cursor = {
+      $or: [
+        { [column]: { [comparison]: nextValue } },
+        // If the nextValue is an exact match, we need a tiebreaker, so we use the _id field from the cursor.
+        { [column]: nextValue, _id: { $lt: nextId } }
+      ]
+    }
+  } 
+
+  console.log('nextValue', nextValue)
+  console.log('nextId', nextId)
+  console.log('cursor', cursor)
+
+  const blogsData = await Blog
+    .find({...cursor}, {
       likes: { '$elemMatch': { '$eq': user._id } },
       title: 1,
       author: 1,
       url: 1,
-      likesCount: 1
+      likesCount: 1,
+      commentsCount: 1,
+      createdAt: 1,
     })
+    .sort({
+      [column]: order,
+      _id: 'desc'
+    })
+    .limit(limit)
     .populate('user', { blogs: 0, comments: 0 })
     .populate({
       path: 'comments',
@@ -33,24 +62,68 @@ blogsRouter.get('/', authenticateJWTandUserIfTokenExists, async (request, respon
         select: { blogs: 0, comments: 0 }
       },
     })
-  
-  // mongoose query results are frozen objects so immutable. Convert to regular JSON object from immutable mongoose document object to manipulate the query result. (in this case, to add new prop didUserLike and remove likes property.) 
-  const blogToJSON = blogs.map(blog => blog.toJSON())
-  const result = blogToJSON.map(b => {
-    if (user === 'GUEST') {
-      return { ...b, didUserLike: null, likes: undefined }
+
+  let toSend
+  if (blogsData.length === 0) {
+    // last page
+    toSend = {
+      blogs: blogsData,
+      next: null,
+      hasNext: false
+    }
+  } else {    
+    const blogs = blogsData.map(blog => {
+      if (user.role === 'GUEST') {
+        return { ...blog.toJSON(), didUserLike: null }
+      }
+
+      if (blog.likes.length === 1) {
+        return { ...blog.toJSON(), didUserLike: true }
+      } else if (blog.likes.length === 0) {
+        return { ...blog.toJSON(), didUserLike: false }
+      }
+    })
+
+    const base = request.protocol + '://' + request.get('host') + request.originalUrl // full request url
+    const path = new URL(base).pathname // /api/blogs
+
+    lastItem = blogsData[blogsData.length -1]
+    const nextCursor = (column === 'createdAt')
+     ? lastItem[column].toISOString() + "_" + lastItem['_id']
+     : lastItem[column]+ "_" + lastItem['_id']
+
+    console.log('nextCursor', nextCursor)
+
+    console.log('original query params, ', request.query)
+    const params = {
+      ...request.query,
+      next: nextCursor
     }
 
-    if (b.likes.length === 1) {
-      return { ...b, didUserLike: true, likes: undefined }
-    } else if (b.likes.length === 0) {
-      return { ...b, didUserLike: false, likes: undefined }
+    console.log('next query params', params)
+
+    const paramsEncoded = querystring.stringify(params)
+    console.log('paramsEncoded', paramsEncoded)
+
+    const next = request.protocol + '://' + request.get('host') + path + "?" + paramsEncoded
+    console.log('next url ', next)
+
+    toSend = {
+      blogs,
+      next,
+      hasNext: true
     }
-  })
+
+  }
   
-  response.json(result)
+  console.log('so token attached ? ', request.token)
+  console.log('user? ', user)
+  response.status(200).json(toSend)
 })
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 blogsRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, async (request, response) => {
   const { user } = request
@@ -68,6 +141,8 @@ blogsRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, asy
   await user.save()
 
   const blogCreated = await Blog.findById(savedBlog._id).populate('user', { blogs: 0, comments: 0 })
+
+  await sleep(5000)
   response.status(201).json(blogCreated.toJSON())
 })
 

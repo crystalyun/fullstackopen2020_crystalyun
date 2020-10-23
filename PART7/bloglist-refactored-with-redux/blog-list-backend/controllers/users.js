@@ -5,7 +5,7 @@ const User = require('../models/user')
 // base binding will be /api/users
 // user registration
 usersRouter.post('/', async (request, response) => {
-  const { password, username, name } = request.body
+  const { password, username, name, role = 'USER' } = request.body
 
   if ( !password || (password.length < 3)) {
     return response.status(400).json({ error: 'password is a required field and 3 characters minimum' })
@@ -17,6 +17,7 @@ usersRouter.post('/', async (request, response) => {
   const user = new User({
     username,
     name,
+    role,
     passwordHash,
   })
 

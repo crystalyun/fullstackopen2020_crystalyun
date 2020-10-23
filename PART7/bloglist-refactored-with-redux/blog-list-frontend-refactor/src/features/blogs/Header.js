@@ -49,8 +49,10 @@ const LoggedInView = props => {
         dispatch(logout())
         handleClose()
     }
+    const isAdmin = (props.currentUser.role === 'ADMIN')
 
     if (props.currentUser.name) {
+
         return (
             <>
                 <Avatar src={avatarSrc} alt={props.currentUser.name} className={classes.orange} onClick={handleClick} />
@@ -61,9 +63,9 @@ const LoggedInView = props => {
                     open={Boolean(anchorEl)}
                     onClose={handleClose}
                 >
-                    <UserMenu handleClose={handleClose} currentUser={props.currentUser} handleLogout={handleLogout} />
-
-                    <AdminMenu handleClose={handleClose} currentUser={props.currentUser} handleLogout={handleLogout}/>
+                    <MenuItem to={`/users/${props.currentUser.id}`} onClick={handleClose} component={RouterLink}>My Posts</MenuItem>
+                    {isAdmin && <MenuItem to='/users' onClick={handleClose} component={RouterLink}>Manage Users</MenuItem>}
+                    <MenuItem to='/' onClick={handleLogout} component={RouterLink}>Logout</MenuItem>
                 </Menu>
             </>
 
@@ -97,33 +99,6 @@ const Header = () => {
             <Toolbar />
         </>
     )
-}
-
-const UserMenu = ({ handleClose, currentUser, handleLogout }) => {
-    if (currentUser.role === 'USER') {
-        return (
-            <>
-                <MenuItem to={`/users/${currentUser.id}`} onClick={handleClose} component={RouterLink}>My Posts</MenuItem>
-                <MenuItem to='/' onClick={handleLogout} component={RouterLink}>Logout</MenuItem>
-            </>
-        )
-    }
-
-    return null
-}
-
-const AdminMenu = ({ handleClose, currentUser, handleLogout }) => {
-    if (currentUser.role === 'ADMIN') {
-        return (
-            <>
-                <MenuItem to={`/users/${currentUser.id}`} onClick={handleClose} component={RouterLink}>My Posts</MenuItem>
-                <MenuItem to='/users' onClick={handleClose} component={RouterLink}>Manage Users</MenuItem>
-                <MenuItem to='/' onClick={handleLogout} component={RouterLink}>Logout</MenuItem>
-            </>
-        )
-    }
-
-    return null
 }
 
 export default Header

@@ -3,8 +3,8 @@ import helper from '../utils/helper'
 
 const baseUrl = '/api/blogs'
 
-const getAll = ({ token }) => {
-  const request = axios.get(baseUrl, helper.makeAuthHeader(token))
+const getBlogs = ({ token, nextUrl }) => {
+  const request = axios.get(`${nextUrl}`, helper.makeAuthHeader(token))
   return request.then(response => response.data)
 }
 
@@ -23,14 +23,14 @@ const deleteBlog = async (id) => {
   return response.data
 }
 
-const likeBlog = async (id) => {
-  const response = await axios.post(`${baseUrl}/${id}/like`, null, helper.makeAuthHeader())
+const likeBlog = async ({ token, postId }) => {
+  const response = await axios.post(`${baseUrl}/${postId}/like`, null, helper.makeAuthHeader(token))
   return response.data
 }
 
-const unlikeBlog = async (id) => {
-  const response = await axios.post(`${baseUrl}/${id}/unlike`, null, helper.makeAuthHeader())
+const unlikeBlog = async ({ token, postId }) => {
+  const response = await axios.post(`${baseUrl}/${postId}/unlike`, null, helper.makeAuthHeader(token))
   return response.data
 }
 
-export default { getAll, create, update, deleteBlog, likeBlog, unlikeBlog }
+export default { getBlogs, create, update, deleteBlog, likeBlog, unlikeBlog }

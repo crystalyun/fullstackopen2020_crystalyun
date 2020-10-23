@@ -42,6 +42,7 @@ commentsRouter.post('/', authUserRequired, authenticateJWTandUserIfTokenExists, 
 
     // remember to also update `Blog` model's `comments` field.
     blog.comments = blog.comments.concat(savedComment._id)
+    blog.commentsCount += 1 
     await blog.save()
 
     // remember to also update `User` model's `comments` field.

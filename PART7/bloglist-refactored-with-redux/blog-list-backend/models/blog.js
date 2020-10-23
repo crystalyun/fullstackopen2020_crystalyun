@@ -7,7 +7,10 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  author: String,
+  author: {
+    type: String,
+    required: true,
+  },
   url: {
     type: String,
     required: true
@@ -26,12 +29,16 @@ const blogSchema = new mongoose.Schema({
       ref: 'Comment'
     }
   ],
+  commentsCount: {
+    type: Number,
+    default: 0
+  },
   likes : [
     {
       type: mongoose.Schema.Types.ObjectId
     }
   ],
-})
+}, { timestamps: true })
 
 // called when JSON.stringify() (=response.json()) is called
 blogSchema.set('toJSON', {
@@ -39,8 +46,10 @@ blogSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
+    delete returnedObject.likes
   }
-})
+})  
+
 
 
 module.exports = mongoose.model('Blog', blogSchema)

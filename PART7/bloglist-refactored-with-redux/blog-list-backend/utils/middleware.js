@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const errorHandler = (error, request, response, next) => {
   logger.info('error is now being handled in middleware error handler')
   logger.error(error.message)
+  console.log('wtf!!!', error)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
@@ -12,6 +13,8 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).json({ error: error.message })
   } else if (error.name === 'JsonWebTokenError') {
     return response.status(401).json({ error: 'invalid token' })
+  } else {
+    console.log('ok')
   }
 
   // In all other error situations, the middleware passes the error forward to the default Express error handler.
@@ -43,7 +46,8 @@ const authUserRequired = (request, response, next) => {
 
 const authenticateJWTandUserIfTokenExists = async (request, response, next) => {
   if (!request.token) {
-    console.log('token not attached to the request. call next().')
+    console.log('token not attached to the request. Set user role as `GUEST` and call next().')
+    request.user = { role: 'GUEST' }
     next()
   } else {
     // if decodedToken is verified, format will be {username, id, iat}

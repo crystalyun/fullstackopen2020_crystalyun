@@ -8,8 +8,8 @@ const getAllByBlogId = (blogId) => {
     return request.then(response => response.data)
 }
 
-const create = async (blogId, comment) => {
-    const response = await axios.post(`${baseUrl}/${blogId}/comments`, comment, helper.getAuthHeader())
+const create = async ({ postId, comment, token }) => {
+    const response = await axios.post(`${baseUrl}/${postId}/comments`, comment, helper.makeAuthHeader(token))
     return response.data
 }
 

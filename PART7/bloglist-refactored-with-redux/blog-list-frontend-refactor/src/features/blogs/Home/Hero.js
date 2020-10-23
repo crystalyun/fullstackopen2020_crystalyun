@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import { makeStyles, Button, Container, Typography, Grid, Dialog } from '@material-ui/core'
 import AddBlogForm from '../AddBlogForm'
 import { useSelector } from 'react-redux'
@@ -23,9 +24,43 @@ const Hero = () => {
         <UserHero />
       </>
     )
+  } else {
+    return (
+      <>
+        <GuestHero />
+      </>
+    )
   }
 
   return null
+}
+
+const GuestHero = () => {
+  const classes = useStyles()
+
+  return (
+    <Container maxWidth="lg">
+      <Grid container id="hero" className={classes.heroContent}>
+        <Grid item xs={12} sm={5}>
+          <Typography variant="h3" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
+            Enter our community
+          </Typography>
+          <Typography variant="body1" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
+            Tell us your unique and interesting stories. Rainy days in Paris with Baguette and Cigaratte... Or it could be a EDM filled club days in NYC...
+          </Typography>
+          <Button
+            to='/login'
+            component={RouterLink}
+            color="primary"
+            variant="contained"
+            fullWidth
+            style={{ marginTop: '20px'}}>
+              Login
+          </Button>
+        </Grid>
+      </Grid>
+    </Container>    
+  )
 }
 
 const UserHero = () => {
@@ -41,7 +76,7 @@ const UserHero = () => {
   }
 
   return (
-      <Container maxWidth="lg">
+    <Container maxWidth="lg">
       <Grid container id="hero" className={classes.heroContent}>
         <Grid item xs={12} sm={5}>
           <Typography variant="h3" className={classes.cardText} gutterBottom style={{ position: 'relative' }}>
@@ -57,7 +92,7 @@ const UserHero = () => {
           </Dialog>
         </Grid>
       </Grid>
-      </Container>
+    </Container>
   )
 }
 

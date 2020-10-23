@@ -1,2 +1,2 @@
-GET http://localhost:3003/api/blogs
+GET http://localhost:3003/api/blogs?sort=createdAt&order=desc&limit=20&next=2020-10-11T17%3A18%3A20.333Z_5f833e5c5ce03d2988d151b3
 Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJyaXRuZXkiLCJpZCI6IjVmNDcwNzlkYTVkMmQ0MGRhY2NjZmU4NiIsImlhdCI6MTU5ODc5ODYxN30.ux7FmKqHtvTsCVxqU9pZz5ddGJ2vQHmbJOachEfAv3M

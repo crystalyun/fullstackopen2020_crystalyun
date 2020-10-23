@@ -13,7 +13,7 @@ const commentSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     }
-})
+}, { timestamps: true })
 
 // called when JSON.stringify() (=response.json()) is called. (converting JS object into JSON string object)
 commentSchema.set('toJSON', {

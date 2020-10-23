@@ -1,0 +1,191 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Blogs API",
+        "description": "Blogs API spec to assist infinite scorll"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3003"
+        }
+    ],
+    "paths": {
+        "/api/blogs": {
+            "get": {
+                "description": "Authentication is optional for liking and commenting posts.",
+                "security": [
+                    {},
+                    {"BearerAuth": []}
+                ],
+                "parameters": [
+                    {   
+                        "in": "query",
+                        "name": "sort",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["commentsCount","likesCount", "createdAt"],
+                            "default": "createdAt"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["desc","asc"],
+                            "default": "desc"
+                        }
+                    },
+                    {   
+                        "description": "How many items to return at one time (max 100)",
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        }
+                    },
+                    {   
+                        "description": "For initial call, `null` , For subsequent calls, next=[lastItem.fieldName]_[lastItem.id]",
+                        "in": "query",
+                        "name": "next",
+                        "schema": {
+                            "type": "string",
+                            "example": "5_5f8bccfb14fcd160d456c07f"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A paged array of blogs with next page links",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "blogs": {
+                                            "$ref": "#/components/schemas/Blogs"
+                                        },
+                                        "next": {
+                                            "type": "string",
+                                            "nullable": true,
+                                            "format": "uri",
+                                            "example": "http://localhost:3003/api/blogs?sort=commentsCount&order=desc&limit=20&next=5_5f8bccfb14fcd160d456c07f"
+                                        },
+                                        "hasNext": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "Blogs": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Blog"
+                }
+            },
+            "Blog": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "likesCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "comments": {
+                        "$ref": "#/components/schemas/Comments"
+                    },
+                    "commentsCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "author": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "didUserLike": {
+                        "type": "boolean",
+                        "nullable": true
+                    }
+                }
+            },
+            "Comments": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/Comment"
+                }
+            },
+            "Comment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    }
+                }
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": ["USER", "ADMIN"]
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

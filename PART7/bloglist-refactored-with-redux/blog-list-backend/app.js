@@ -1,4 +1,7 @@
 const config = require('./utils/config')
+const OpenApiValidator = require('express-openapi-validator')
+const bodyParser = require('body-parser')
+const path = require('path')
 const express = require('express')
 require('express-async-errors')
 const cors = require('cors')
@@ -10,6 +13,7 @@ const usersRouter = require('./controllers/users')
 const blogsRouter = require('./controllers/blogs')
 const middleware = require('./utils/middleware')
 const commentsRouter = require('./controllers/comments')
+const apiSpec = path.join(__dirname, '/controllers/blogs.json')
 
 const mongoUrl = config.MONGODB_URI
 
@@ -24,9 +28,20 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
     logger.error('error connection to MongoDB:', error.message)
   })
 
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.text())
+app.use(bodyParser.json())
+
+app.use('/spec', express.static(apiSpec))
 app.use(cors())
 app.use(express.json())
 app.use(middleware.tokenExtractor)
+app.use(
+  OpenApiValidator.middleware({
+    apiSpec,
+    // validateResponses: true,
+  })
+)
 
 app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
